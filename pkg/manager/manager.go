@@ -27,7 +27,6 @@ import (
 	"github.com/seal-io/walrus/pkg/apis"
 	"github.com/seal-io/walrus/pkg/controllers"
 	"github.com/seal-io/walrus/pkg/kuberest"
-	"github.com/seal-io/walrus/pkg/kubereviewself"
 	"github.com/seal-io/walrus/pkg/system"
 	"github.com/seal-io/walrus/pkg/systemdeployer"
 	"github.com/seal-io/walrus/pkg/webhooks"
@@ -41,13 +40,13 @@ func (m *Manager) Prepare(ctx context.Context) error {
 	loopbackKubeCli := system.LoopbackKubeClient.Get()
 
 	// Initialize CRDs.
-	err := kubereviewself.Try(apis.InstallCustomResourceDefinitions(ctx, loopbackKubeCli))
+	err := apis.InstallCustomResourceDefinitions(ctx, loopbackKubeCli)
 	if err != nil {
 		return fmt.Errorf("install CRDs: %w", err)
 	}
 
 	// Initialize deployer cluster role.
-	err = kubereviewself.Try(systemdeployer.Initialize(ctx, loopbackKubeCli))
+	err = systemdeployer.Initialize(ctx, loopbackKubeCli)
 	if err != nil {
 		return fmt.Errorf("install deployer cluster role: %w", err)
 	}

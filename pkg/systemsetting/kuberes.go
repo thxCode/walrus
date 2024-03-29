@@ -12,13 +12,14 @@ import (
 	"github.com/seal-io/walrus/pkg/clients/clientset"
 	"github.com/seal-io/walrus/pkg/kubeclientset"
 	"github.com/seal-io/walrus/pkg/kubeclientset/review"
+	"github.com/seal-io/walrus/pkg/system"
 	"github.com/seal-io/walrus/pkg/systemkuberes"
 	"github.com/seal-io/walrus/pkg/systemmeta"
 )
 
 const (
 	// DelegatedSecretNamespace is the delegated Kubernetes Secret namespace for the settings.
-	DelegatedSecretNamespace = systemkuberes.SystemNamespaceName
+	DelegatedSecretNamespace = system.NamespaceName
 
 	// DelegatedSecretName is the delegated Kubernetes Secret name for the settings.
 	DelegatedSecretName = "walrus-settings"
@@ -28,12 +29,7 @@ const (
 //
 // Initialize creates the delegated Kubernetes Secret for settings.
 func Initialize(ctx context.Context, cli clientset.Interface) error {
-	err := systemkuberes.InstallSystemNamespace(ctx, cli)
-	if err != nil {
-		return err
-	}
-
-	err = review.CanDoUpdate(ctx,
+	err := review.CanDoUpdate(ctx,
 		cli.AuthorizationV1().SelfSubjectAccessReviews(),
 		review.Simples{
 			{

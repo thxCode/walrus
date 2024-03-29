@@ -4,10 +4,8 @@ import (
 	"slices"
 )
 
-const (
-	// LockedResourceFinalizer is the finalizer to indicate the resource is locked by system.
-	LockedResourceFinalizer = "walrus.seal.io/controlled"
-)
+// LockedResourceFinalizer is the finalizer to indicate the resource is locked by system.
+const LockedResourceFinalizer = "walrus.seal.io/controlled"
 
 // Lock adds a finalizer to the given resource.
 //

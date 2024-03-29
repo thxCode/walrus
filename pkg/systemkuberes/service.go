@@ -14,53 +14,14 @@ import (
 	"github.com/seal-io/walrus/pkg/system"
 )
 
-// SystemNamespaceName is the name indicates which Kubernetes Namespace storing system resources.
-const SystemNamespaceName = "walrus-system"
-
-// InstallSystemNamespace creates the system namespace.
-func InstallSystemNamespace(ctx context.Context, cli clientset.Interface) error {
-	err := review.CanDoCreate(ctx,
-		cli.AuthorizationV1().SelfSubjectAccessReviews(),
-		review.Simples{
-			{
-				Group:    core.SchemeGroupVersion.Group,
-				Version:  core.SchemeGroupVersion.Version,
-				Resource: "namespaces",
-			},
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	nsCli := cli.CoreV1().Namespaces()
-	ns := &core.Namespace{
-		ObjectMeta: meta.ObjectMeta{
-			Name: SystemNamespaceName,
-		},
-	}
-
-	_, err = kubeclientset.Create(ctx, nsCli, ns)
-	if err != nil {
-		return fmt.Errorf("install namespace %q: %w", ns.GetName(), err)
-	}
-
-	return nil
-}
-
 // SystemRoutingServiceName is the name indicates which Kubernetes Service routing system access.
-const SystemRoutingServiceName = "walrus"
+const SystemRoutingServiceName = system.RoutingServiceName
 
 // InstallFakeSystemRoutingService creates the fake routing service/endpoint for system.
 //
 // The service points to the PrimaryIP of the system.
 func InstallFakeSystemRoutingService(ctx context.Context, cli clientset.Interface, port int) error {
-	err := InstallSystemNamespace(ctx, cli)
-	if err != nil {
-		return err
-	}
-
-	err = review.CanDoCreate(ctx,
+	err := review.CanDoCreate(ctx,
 		cli.AuthorizationV1().SelfSubjectAccessReviews(),
 		review.Simples{
 			{

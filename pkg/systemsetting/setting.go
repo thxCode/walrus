@@ -254,7 +254,7 @@ var (
 		"Indicates the UUID after server installation, "+
 			"it's used for telemetry.",
 		_SettingPropPrivate,
-		setting.InitializeFrom(stringx.Hex(16)),
+		setting.InitializeFrom(stringx.RandomHex(16)),
 		setting.Disallow,
 	)
 	ServeUiUrl = newSetting(

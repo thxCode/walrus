@@ -18,7 +18,7 @@ const DefaultEnvironmentName = DefaultProjectName + "-local"
 
 // InstallDefaultEnvironment creates the default environment, alias to Kubernetes Namespace default-local.
 func InstallDefaultEnvironment(ctx context.Context, cli clientset.Interface) error {
-	err := review.CanDoUpdate(ctx,
+	err := review.CanDoCreate(ctx,
 		cli.AuthorizationV1().SelfSubjectAccessReviews(),
 		review.Simples{
 			{
@@ -27,7 +27,6 @@ func InstallDefaultEnvironment(ctx context.Context, cli clientset.Interface) err
 				Resource: "environments",
 			},
 		},
-		review.WithCreateIfNotExisted(),
 	)
 	if err != nil {
 		return err

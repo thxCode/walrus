@@ -13,6 +13,12 @@ func LookupEnv(key string) (string, bool) {
 	return os.LookupEnv(key)
 }
 
+// ExistEnv checks if the environment variable named by the key exists.
+func ExistEnv(key string) bool {
+	_, ok := LookupEnv(key)
+	return ok
+}
+
 // Getenv retrieves the value of the environment variable named by the key.
 // It returns the default, which will be empty if the variable is not present.
 // To distinguish between an empty value and an unset value, use LookupEnv.

@@ -38,7 +38,7 @@ import (
 // FileExampleHandler will clone the repository to the local file system at first.
 // Then, it will load the file examples from the local file system.
 //
-// The icon of each v1.FileExample object has been encoded as Base64.
+// The icon of each v1.FileExample object has been encoded as RandomBase64.
 type FileExampleHandler struct {
 	extensionapi.ObjectInfo
 	extensionapi.GetOperation

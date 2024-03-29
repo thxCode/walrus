@@ -18,7 +18,7 @@ const DefaultProjectName = core.NamespaceDefault
 
 // InstallDefaultProject creates the default project, alias of the Kubernetes Namespace default.
 func InstallDefaultProject(ctx context.Context, cli clientset.Interface) error {
-	err := review.CanDoUpdate(ctx,
+	err := review.CanDoCreate(ctx,
 		cli.AuthorizationV1().SelfSubjectAccessReviews(),
 		review.Simples{
 			{
@@ -27,7 +27,6 @@ func InstallDefaultProject(ctx context.Context, cli clientset.Interface) error {
 				Resource: "projects",
 			},
 		},
-		review.WithCreateIfNotExisted(),
 	)
 	if err != nil {
 		return err

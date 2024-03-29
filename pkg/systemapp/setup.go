@@ -16,10 +16,13 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/rest"
 
+	"github.com/seal-io/walrus/pkg/system"
 	"github.com/seal-io/walrus/pkg/systemapp/helm"
-	"github.com/seal-io/walrus/pkg/systemkuberes"
 	"github.com/seal-io/walrus/pkg/systemsetting"
 )
+
+// InstalledNamespaceName is the name indicates which Kubernetes Namespace storing system resources.
+const InstalledNamespaceName = system.NamespaceName
 
 // NB(thxCode): Register installer below.
 var installers = []_Installer{
@@ -31,7 +34,7 @@ type _Installer func(context.Context, *helm.Client, map[string]any, sets.Set[str
 
 // Install installs the system applications.
 func Install(ctx context.Context, cliConfig rest.Config, disable sets.Set[string]) error {
-	hc, err := helm.NewClient(&cliConfig, helm.WithNamespace(systemkuberes.SystemNamespaceName))
+	hc, err := helm.NewClient(&cliConfig, helm.WithNamespace(InstalledNamespaceName))
 	if err != nil {
 		return fmt.Errorf("create helm client: %w", err)
 	}

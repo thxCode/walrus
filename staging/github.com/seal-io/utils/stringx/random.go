@@ -9,12 +9,12 @@ import (
 	"encoding/hex"
 )
 
-// list of default letters that can be used to make a random string when calling String
+// list of default letters that can be used to make a random string when calling RandomString
 // function with no letters provided.
 var defLetters = []rune("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-// Bytes generates n random bytes.
-func Bytes(n int) []byte {
+// RandomBytes generates n random bytes.
+func RandomBytes(n int) []byte {
 	b := make([]byte, n)
 
 	_, err := rand.Read(b)
@@ -25,18 +25,18 @@ func Bytes(n int) []byte {
 	return b
 }
 
-// Base64 generates a random base64 string with length of n.
-func Base64(n int) string {
-	return String(n, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/")
+// RandomBase64 generates a random base64 string with length of n.
+func RandomBase64(n int) string {
+	return RandomString(n, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/")
 }
 
-// Hex generates a random hex string with length of n
+// RandomHex generates a random hex string with length of n
 // e.g: 67aab2d956bd7cc621af22cfb169cba8.
-func Hex(n int) string { return hex.EncodeToString(Bytes(n)) }
+func RandomHex(n int) string { return hex.EncodeToString(RandomBytes(n)) }
 
-// String generates a random string using only letters provided in the letters parameter
+// RandomString generates a random string using only letters provided in the letters parameter
 // if user omit letters parameters, this function will use defLetters instead.
-func String(n int, letters ...string) string {
+func RandomString(n int, letters ...string) string {
 	var (
 		letterRunes []rune
 		bb          bytes.Buffer
@@ -53,7 +53,7 @@ func String(n int, letters ...string) string {
 	l := uint32(len(letterRunes))
 	// On each loop, generate one random rune and append to output.
 	for i := 0; i < n; i++ {
-		bb.WriteRune(letterRunes[binary.BigEndian.Uint32(Bytes(4))%l])
+		bb.WriteRune(letterRunes[binary.BigEndian.Uint32(RandomBytes(4))%l])
 	}
 
 	return bb.String()
