@@ -101,6 +101,8 @@ func crd_crd_gen_generators_testdata_crd_gen_Dummy() *v1.CustomResourceDefinitio
 										"arrayObject",
 										"subDummySpecPointer",
 										"sliceSubDummySpec",
+										"dummyX",
+										"dummyY",
 									},
 									Properties: map[string]v1.JSONSchemaProps{
 										"arrayObject": {
@@ -168,6 +170,56 @@ func crd_crd_gen_generators_testdata_crd_gen_Dummy() *v1.CustomResourceDefinitio
 										"boolPointer": {
 											Type:     "boolean",
 											Nullable: true,
+										},
+										"dummyX": {
+											Type: "object",
+											Required: []string{
+												"z",
+												"x",
+											},
+											Properties: map[string]v1.JSONSchemaProps{
+												"x": {
+													Type:                   "object",
+													Nullable:               true,
+													XPreserveUnknownFields: ptr.To[bool](true),
+												},
+												"z": {
+													Type: "object",
+													Required: []string{
+														"test",
+													},
+													Properties: map[string]v1.JSONSchemaProps{
+														"test": {
+															Type: "string",
+														},
+													},
+												},
+											},
+										},
+										"dummyY": {
+											Type: "object",
+											Required: []string{
+												"z",
+												"y",
+											},
+											Properties: map[string]v1.JSONSchemaProps{
+												"y": {
+													Type:                   "object",
+													Nullable:               true,
+													XPreserveUnknownFields: ptr.To[bool](true),
+												},
+												"z": {
+													Type: "object",
+													Required: []string{
+														"test",
+													},
+													Properties: map[string]v1.JSONSchemaProps{
+														"test": {
+															Type: "string",
+														},
+													},
+												},
+											},
 										},
 										"duration": {
 											Type:   "string",
@@ -471,7 +523,8 @@ func crd_crd_gen_generators_testdata_crd_gen_Dummy() *v1.CustomResourceDefinitio
 											Type: "array",
 											Items: &v1.JSONSchemaPropsOrArray{
 												Schema: &v1.JSONSchemaProps{
-													Ref: ptr.To("#/definitions/github.com~1seal-io~1code-generator~1cmd~1crd-gen~1generators~1testdata~1crd_gen~0DummySpec"),
+													Type:                   "object",
+													XPreserveUnknownFields: ptr.To[bool](true),
 												},
 											},
 											Nullable: true,
@@ -495,8 +548,9 @@ func crd_crd_gen_generators_testdata_crd_gen_Dummy() *v1.CustomResourceDefinitio
 											Nullable: true,
 										},
 										"subDummySpecPointer": {
-											Ref:      ptr.To("#/definitions/github.com~1seal-io~1code-generator~1cmd~1crd-gen~1generators~1testdata~1crd_gen~0DummySpec"),
-											Nullable: true,
+											Type:                   "object",
+											Nullable:               true,
+											XPreserveUnknownFields: ptr.To[bool](true),
 										},
 										"time": {
 											Type:   "string",

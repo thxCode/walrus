@@ -38,7 +38,7 @@ function before() {
   fi
 
   if [[ ! -f "${ROOT_DIR}/.sbin/goimports" ]]; then
-    GOBIN="${ROOT_DIR}/.sbin/protoc/bin" \
+    GOBIN="${ROOT_DIR}/.sbin" \
       go install golang.org/x/tools/cmd/goimports@latest
   fi
 }

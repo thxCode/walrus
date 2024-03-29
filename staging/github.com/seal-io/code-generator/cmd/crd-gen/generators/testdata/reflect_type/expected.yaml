@@ -79,6 +79,40 @@ spec:
                 default: true
                 nullable: true
                 type: boolean
+              dummyX:
+                properties:
+                  x:
+                    nullable: true
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  z:
+                    properties:
+                      test:
+                        type: string
+                    required:
+                    - test
+                    type: object
+                required:
+                - z
+                - x
+                type: object
+              dummyY:
+                properties:
+                  "y":
+                    nullable: true
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  z:
+                    properties:
+                      test:
+                        type: string
+                    required:
+                    - test
+                    type: object
+                required:
+                - z
+                - "y"
+                type: object
               duration:
                 format: duration
                 type: string
@@ -260,7 +294,8 @@ spec:
                 type: array
               sliceSubDummySpec:
                 items:
-                  $ref: '#/definitions/github.com~1seal-io~1code-generator~1cmd~1crd-gen~1generators~1testdata~1reflect_type~0DummySpec'
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
                 nullable: true
                 type: array
               string:
@@ -274,8 +309,9 @@ spec:
                 nullable: true
                 type: string
               subDummySpecPointer:
-                $ref: '#/definitions/github.com~1seal-io~1code-generator~1cmd~1crd-gen~1generators~1testdata~1reflect_type~0DummySpec'
                 nullable: true
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
               time:
                 format: date-time
                 type: string
@@ -315,6 +351,8 @@ spec:
             - arrayObject
             - subDummySpecPointer
             - sliceSubDummySpec
+            - dummyX
+            - dummyY
             type: object
           status:
             type: object

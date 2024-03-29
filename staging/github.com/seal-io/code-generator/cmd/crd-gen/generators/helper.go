@@ -348,16 +348,6 @@ func schemeType(logger klog.Logger, visited map[*types.Type]struct{}, t *types.T
 		return nil
 	}
 
-	if visited == nil {
-		visited = map[*types.Type]struct{}{}
-	}
-
-	if _, found := visited[t]; found {
-		return &apiext.JSONSchemaProps{
-			Ref: ptr.To(refer(t)),
-		}
-	}
-
 	switch t.Kind {
 	case types.Pointer:
 		props = schemeType(logger, visited, t.Elem)
@@ -430,6 +420,20 @@ func schemeType(logger klog.Logger, visited map[*types.Type]struct{}, t *types.T
 				Properties: map[string]apiext.JSONSchemaProps{},
 			}
 
+			if visited != nil {
+				if _, found := visited[t]; found {
+					return &apiext.JSONSchemaProps{
+						Type:                   "object",
+						XPreserveUnknownFields: ptr.To(true),
+					}
+				}
+			}
+
+			visited = map[*types.Type]struct{}{}
+			if t.Name.Package != "" && !t.IsAnonymousStruct() {
+				visited[t] = struct{}{}
+			}
+
 			for _, mem := range t.Members {
 				var (
 					name   = stringx.CamelizeDownFirst(mem.Name)
@@ -454,10 +458,6 @@ func schemeType(logger klog.Logger, visited map[*types.Type]struct{}, t *types.T
 
 				if hidden {
 					continue
-				}
-
-				if t.Name.Package != "" && !t.IsAnonymousStruct() {
-					visited[t] = struct{}{}
 				}
 
 				logger := logger.WithName(name)
@@ -1001,16 +1001,6 @@ func isStruct(t *types.Type) bool {
 	}
 
 	return false
-}
-
-// refer creates a definition link for the given package and type.
-func refer(t *types.Type) string {
-	r := t.Name.Name
-	if t.Name.Package != "" {
-		// Replace `/` with `~1` and `~` with `~0` according to JSONPointer escapes.
-		r = strings.ReplaceAll(t.Name.Package, "/", "~1") + "~0" + t.Name.Name
-	}
-	return "#/definitions/" + r
 }
 
 const (

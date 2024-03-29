@@ -116,6 +116,22 @@ type DummySpec struct {
 
 	SubDummySpecPointer *DummySpec  `json:"subDummySpecPointer,omitempty"`
 	SliceSubDummySpec   []DummySpec `json:"sliceSubDummySpec,omitempty"`
+	DummyX              DummyX      `json:"dummyX,omitempty"`
+	DummyY              DummyY      `json:"dummyY,omitempty"`
+}
+
+type DummyX struct {
+	Z DummyZRef `json:"z"`
+	X *DummyX   `json:"x"`
+}
+
+type DummyY struct {
+	Z DummyZRef `json:"z"`
+	Y *DummyY   `json:"y"`
+}
+
+type DummyZRef struct {
+	Test string `json:"test"`
 }
 
 // DummyStatus defines the observed state of Dummy.
