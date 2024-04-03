@@ -205,7 +205,7 @@ func reflectType(p *types.Package, t *types.Type) *CRDTypeDefinition {
 		crd.Spec.Versions[0].AdditionalPrinterColumns = append(crd.Spec.Versions[0].AdditionalPrinterColumns, pcd)
 	}
 
-	if props := schemeType(logger, nil, t); props != nil {
+	if props := schemeType(logger, nil, t, 0); props != nil {
 		props.Description = strings.Join(tm["comment"], "\n")
 		crd.Spec.Versions[0].Schema.OpenAPIV3Schema = props
 	}
@@ -249,6 +249,14 @@ var (
 		"k8s.io/apimachinery/pkg/apis/meta/v1.FieldsV1": {
 			Type:                 "object",
 			AdditionalProperties: &apiext.JSONSchemaPropsOrBool{Allows: true},
+		},
+		"k8s.io/apimachinery/pkg/apis/meta/v1.ConditionStatus": {
+			Type: "string",
+			Enum: []apiext.JSON{
+				{Raw: []byte(`"True"`)},
+				{Raw: []byte(`"False"`)},
+				{Raw: []byte(`"Unknown"`)},
+			},
 		},
 		"k8s.io/apimachinery/pkg/apis/meta/v1.Time": {
 			Type:   "string",
@@ -343,14 +351,14 @@ var (
 )
 
 // schemeType reflects the given type into a JSONSchemaProps .
-func schemeType(logger klog.Logger, visited map[*types.Type]struct{}, t *types.Type) (props *apiext.JSONSchemaProps) {
+func schemeType(logger klog.Logger, visited map[*types.Type]struct{}, t *types.Type, lvl int) (props *apiext.JSONSchemaProps) {
 	if t == nil {
 		return nil
 	}
 
 	switch t.Kind {
 	case types.Pointer:
-		props = schemeType(logger, visited, t.Elem)
+		props = schemeType(logger, visited, t.Elem, lvl+1)
 		if props != nil {
 			props.Nullable = true
 		}
@@ -358,7 +366,7 @@ func schemeType(logger klog.Logger, visited map[*types.Type]struct{}, t *types.T
 		if r, found := knownTypedProps[t.String()]; found {
 			props = &r
 		} else {
-			props = schemeType(logger, visited, t.Underlying)
+			props = schemeType(logger, visited, t.Underlying, lvl+1)
 		}
 	case types.Map:
 		if t.Key != types.String {
@@ -366,7 +374,7 @@ func schemeType(logger klog.Logger, visited map[*types.Type]struct{}, t *types.T
 			props = ptr.To(bytesProps)
 			logger.Error(nil, "invalid map key type, must be string, fallback to byte slice",
 				"type", t.Key.String())
-		} else if r := schemeType(logger, visited, t.Elem); r != nil {
+		} else if r := schemeType(logger, visited, t.Elem, lvl+1); r != nil {
 			props = &apiext.JSONSchemaProps{
 				Type: "object",
 				AdditionalProperties: &apiext.JSONSchemaPropsOrBool{
@@ -385,7 +393,7 @@ func schemeType(logger klog.Logger, visited map[*types.Type]struct{}, t *types.T
 			XPreserveUnknownFields: ptr.To(true),
 		}
 	case types.Array:
-		props = schemeType(logger, visited, t.Elem)
+		props = schemeType(logger, visited, t.Elem, lvl+1)
 
 		if props != nil {
 			props.MinItems = ptr.To(t.Len)
@@ -394,7 +402,7 @@ func schemeType(logger klog.Logger, visited map[*types.Type]struct{}, t *types.T
 	case types.Slice:
 		if t.Elem == types.Byte && t.Len == 0 {
 			props = ptr.To(bytesProps)
-		} else if r := schemeType(logger, visited, t.Elem); r != nil {
+		} else if r := schemeType(logger, visited, t.Elem, lvl+1); r != nil {
 			props = &apiext.JSONSchemaProps{
 				Type: "array",
 				Items: &apiext.JSONSchemaPropsOrArray{
@@ -462,7 +470,7 @@ func schemeType(logger klog.Logger, visited map[*types.Type]struct{}, t *types.T
 
 				logger := logger.WithName(name)
 
-				subProps := schemeType(logger, visited, mem.Type)
+				subProps := schemeType(logger, visited, mem.Type, lvl+1)
 				if subProps == nil {
 					continue
 				}
@@ -474,7 +482,7 @@ func schemeType(logger klog.Logger, visited map[*types.Type]struct{}, t *types.T
 					continue
 				}
 
-				if name != "status" {
+				if name != "status" || (name == "status" && lvl != 0) {
 					props.Required = append(props.Required, name)
 				}
 
@@ -879,27 +887,16 @@ func schemeType(logger klog.Logger, visited map[*types.Type]struct{}, t *types.T
 		if r, found := knownTypedProps[t.String()]; found {
 			props = &r
 		} else {
-			switch {
-			case t == types.Bool:
+			switch t {
+			case types.Bool:
 				props = &apiext.JSONSchemaProps{
 					Type: "boolean",
 				}
-			case t == types.String:
+			case types.String:
 				props = &apiext.JSONSchemaProps{
 					Type: "string",
 				}
-			case types.IsInteger(t):
-				props = &apiext.JSONSchemaProps{
-					Type: "integer",
-				}
-
-				switch t {
-				case types.Int32, types.Uint16:
-					props.Format = "int32"
-				case types.Int64, types.Uint32:
-					props.Format = "int64"
-				}
-			default:
+			case types.Float, types.Float32, types.Float64:
 				props = &apiext.JSONSchemaProps{
 					Type: "number",
 				}
@@ -909,6 +906,20 @@ func schemeType(logger klog.Logger, visited map[*types.Type]struct{}, t *types.T
 					props.Format = "float"
 				case types.Float64:
 					props.Format = "double"
+				}
+			case types.Int, types.Int64, types.Int32,
+				types.Int16, types.Uint, types.Uint64,
+				types.Uint32, types.Uint16, types.Byte,
+				types.Uintptr:
+				props = &apiext.JSONSchemaProps{
+					Type: "integer",
+				}
+
+				switch t {
+				case types.Int32, types.Uint16:
+					props.Format = "int32"
+				case types.Int64, types.Uint32:
+					props.Format = "int64"
 				}
 			}
 		}

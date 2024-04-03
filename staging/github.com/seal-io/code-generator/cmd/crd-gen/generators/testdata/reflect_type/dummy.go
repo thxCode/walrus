@@ -136,4 +136,5 @@ type DummyZRef struct {
 
 // DummyStatus defines the observed state of Dummy.
 type DummyStatus struct {
+	Conditions []meta.Condition `json:"conditions,omitempty"`
 }
