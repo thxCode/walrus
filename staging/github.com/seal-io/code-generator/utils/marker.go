@@ -1,6 +1,8 @@
 package utils
 
-import "strings"
+import (
+	"strings"
+)
 
 func ParseMarker(line string) map[string]string {
 	rm := map[string]string{}
@@ -12,7 +14,7 @@ func ParseMarker(line string) map[string]string {
 
 		if r != "" {
 			switch r[0] {
-			case '[', '{':
+			case '[', '{', '"':
 				if i := indexJSON(r); -1 < i && i < len(r)-1 {
 					rm[h] = r[:i+1]
 					r = r[i+2:]
@@ -34,17 +36,48 @@ func ParseMarker(line string) map[string]string {
 }
 
 func indexJSON(r string) int {
-	var c int
+	if len(r) == 0 || r[0] == '\\' {
+		return -1
+	}
 
-	for i := 0; i < len(r); i++ {
+	var (
+		c  = 1
+		qs = r[0] == '"'
+		bs bool
+	)
+
+	for i := 1; i < len(r); i++ {
+		if bs {
+			bs = false
+			continue
+		}
+
 		switch r[i] {
-		case '{', '[':
-			c++
-		case '}', ']':
-			c--
-			if c == 0 {
-				return i
+		case '\\':
+			bs = true
+			continue
+		case '"':
+			qs = !qs
+			if qs {
+				continue
 			}
+			if r[0] == '"' {
+				c--
+			}
+		case '{', '[':
+			if !qs {
+				c++
+				continue
+			}
+		case '}', ']':
+			if qs {
+				continue
+			}
+			c--
+		}
+
+		if c == 0 {
+			return i
 		}
 	}
 

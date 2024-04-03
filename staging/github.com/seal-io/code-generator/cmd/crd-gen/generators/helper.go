@@ -225,8 +225,10 @@ var (
 			XPreserveUnknownFields: ptr.To(true),
 		},
 		"k8s.io/api/core/v1.Protocol": {
-			Type:    "string",
-			Default: &apiext.JSON{Raw: []byte(`"TCP"`)},
+			Type: "string",
+			Default: &apiext.JSON{
+				Raw: []byte(`"TCP"`),
+			},
 		},
 		"k8s.io/apimachinery/pkg/apis/meta/v1.TypeMeta": {
 			Type: "object",
@@ -700,7 +702,8 @@ func schemeType(logger klog.Logger, visited map[*types.Type]struct{}, t *types.T
 							} else if _, err = regexp.Compile(v); err != nil {
 								logger.Error(err, "invalid pattern", "value", mv)
 							} else {
-								subProps.Pattern = v
+								v = strconv.Quote(v)
+								subProps.Pattern = v[1 : len(v)-1]
 							}
 						case "preserveUnknownFields":
 							if !isStruct(mem.Type) {
@@ -937,6 +940,11 @@ func schemeType(logger klog.Logger, visited map[*types.Type]struct{}, t *types.T
 // isNumber returns true if the given type is a number.
 func isNumber(t *types.Type) bool {
 	if t != nil {
+		if r, found := knownTypedProps[t.String()]; found {
+			if r.XIntOrString {
+				return true
+			}
+		}
 		switch t.Kind {
 		case types.Builtin:
 			return types.IsInteger(t) || t == types.Float32 || t == types.Float64
@@ -953,6 +961,14 @@ func isNumber(t *types.Type) bool {
 // isString returns true if the given type is a string.
 func isString(t *types.Type) bool {
 	if t != nil {
+		if r, found := knownTypedProps[t.String()]; found {
+			if r.XIntOrString {
+				return true
+			}
+			if r.Type == "string" {
+				return true
+			}
+		}
 		switch t.Kind {
 		case types.Builtin:
 			return t == types.String
@@ -1015,16 +1031,17 @@ func isStruct(t *types.Type) bool {
 }
 
 const (
-	groupMarker      = "+groupName="
-	versionMarker    = "+versionName="
-	nullableMarker   = "+nullable" // By default, this is nullable.
-	defaultMarker    = "+default="
-	optionalMarker   = "+optional"
-	listTypeMarker   = "+listType="
-	listMapKeyMarker = "+listMapKey="
-	mapTypeMarker    = "+mapType="
-	crdGenMarker     = "+k8s:crd-gen:"
-	validationMarker = "+k8s:validation:" // Compatibility with openapi-gen.
+	groupMarker       = "+groupName="
+	versionMarker     = "+versionName="
+	nullableMarker    = "+nullable" // By default, this is nullable.
+	defaultMarker     = "+default="
+	optionalMarker    = "+optional"
+	listTypeMarker    = "+listType="
+	listMapKeyMarker  = "+listMapKey="
+	mapTypeMarker     = "+mapType="
+	crdGenMarker      = "+k8s:crd-gen:"
+	validationMarker  = "+k8s:validation:"         // Compatibility with openapi-gen.
+	kubebuilderMarker = "+kubebuilder:validation:" // Compatibility with kubebuilder.
 )
 
 // collectMarkers collects markers from the given comments into a map.
@@ -1086,6 +1103,26 @@ func collectMarkers(comments []string, into map[string][]string) {
 					continue
 				}
 				into["validation"] = append(into["validation"], v)
+			}
+		case strings.HasPrefix(line, kubebuilderMarker):
+			if v := line[len(kubebuilderMarker):]; v != "" {
+				v = stringx.CamelizeDownFirst(v)
+				mk, mv, ok := strings.Cut(v, "=")
+				if !ok {
+					continue
+				}
+				switch mk {
+				case "pattern":
+					if strings.HasPrefix(mv, "`") && strings.HasSuffix(mv, "`") {
+						mv = mv[1 : len(mv)-1]
+					}
+					mv = strconv.Quote(mv)
+				case "format":
+					mv = strconv.Quote(strings.ToLower(mv))
+				case "enum":
+					mv = "[\"" + strings.Join(strings.Split(mv, ";"), "\",\"") + "\"]"
+				}
+				into["validation"] = append(into["validation"], fmt.Sprintf("%s=%s", mk, mv))
 			}
 		}
 	}

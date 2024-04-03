@@ -585,20 +585,25 @@ func crd_crd_gen_generators_testdata_crd_gen_Dummy() *v1.CustomResourceDefinitio
 														"lastTransitionTime": {
 															Description: "lastTransitionTime is the last time the condition transitioned from one status to another.\nThis should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.",
 															Type:        "string",
-															Format:      "date-time",
+															Format:      "datetime",
 														},
 														"message": {
 															Description: "message is a human readable message indicating details about the transition.\nThis may be an empty string.",
 															Type:        "string",
+															MaxLength:   ptr.To[int64](32768),
 														},
 														"observedGeneration": {
 															Description: "observedGeneration represents the .metadata.generation that the condition was set based upon.\nFor instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date\nwith respect to the current state of the instance.",
 															Type:        "integer",
 															Format:      "int64",
+															Minimum:     ptr.To[float64](0),
 														},
 														"reason": {
 															Description: "reason contains a programmatic identifier indicating the reason for the condition's last transition.\nProducers of specific condition types may define expected values and meanings for this field,\nand whether the values are considered a guaranteed API.\nThe value should be a CamelCase string.\nThis field may not be empty.",
 															Type:        "string",
+															MaxLength:   ptr.To[int64](1024),
+															MinLength:   ptr.To[int64](1),
+															Pattern:     "^[AZaZ]([AZaZ09,]*[AZaZ09])?$",
 														},
 														"status": {
 															Description: "status of the condition, one of True, False, Unknown.",
@@ -618,6 +623,8 @@ func crd_crd_gen_generators_testdata_crd_gen_Dummy() *v1.CustomResourceDefinitio
 														"type": {
 															Description: "type of condition in CamelCase or in foo.example.com/CamelCase.\n---\nMany .condition.type values are consistent across resources like Available, but because arbitrary conditions can be\nuseful (see .node.status.conditions), the ability to deconflict is important.\nThe regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)",
 															Type:        "string",
+															MaxLength:   ptr.To[int64](316),
+															Pattern:     "^([aZ09]([AZ09]*[aZ09])?(\\.[aZ09]([AZ09]*[aZ09])?)*/)?(([AZaZ09][AZaZ09.]*)?[AZaZ09])$",
 														},
 													},
 												},
