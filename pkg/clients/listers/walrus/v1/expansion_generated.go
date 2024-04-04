@@ -77,6 +77,22 @@ type SettingListerExpansion interface{}
 // SettingNamespaceLister.
 type SettingNamespaceListerExpansion interface{}
 
+// SubjectListerExpansion allows custom methods to be added to
+// SubjectLister.
+type SubjectListerExpansion interface{}
+
+// SubjectNamespaceListerExpansion allows custom methods to be added to
+// SubjectNamespaceLister.
+type SubjectNamespaceListerExpansion interface{}
+
+// SubjectProviderListerExpansion allows custom methods to be added to
+// SubjectProviderLister.
+type SubjectProviderListerExpansion interface{}
+
+// SubjectProviderNamespaceListerExpansion allows custom methods to be added to
+// SubjectProviderNamespaceLister.
+type SubjectProviderNamespaceListerExpansion interface{}
+
 // TemplateListerExpansion allows custom methods to be added to
 // TemplateLister.
 type TemplateListerExpansion interface{}

@@ -29,9 +29,7 @@ import (
 	"github.com/seal-io/walrus/pkg/extensionapis"
 	"github.com/seal-io/walrus/pkg/kuberest"
 	"github.com/seal-io/walrus/pkg/manager"
-	"github.com/seal-io/walrus/pkg/server/clis"
-	"github.com/seal-io/walrus/pkg/server/swagger"
-	"github.com/seal-io/walrus/pkg/server/ui"
+	"github.com/seal-io/walrus/pkg/server/webserver"
 	"github.com/seal-io/walrus/pkg/servers/serverset/scheme"
 	"github.com/seal-io/walrus/pkg/system"
 	"github.com/seal-io/walrus/pkg/systemapp"
@@ -133,6 +131,18 @@ func (s *Server) Prepare(ctx context.Context) error {
 			return errors.New("wait for cache sync")
 		}
 
+		// Initialize default subject provider.
+		err = systemkuberes.InstallDefaultSubjectProvider(ctx, loopbackKubeCli)
+		if err != nil {
+			return err
+		}
+
+		// Initialize default subject.
+		err = systemkuberes.InstallAdminSubject(ctx, loopbackKubeCli, system.BootstrapPassword.Get())
+		if err != nil {
+			return err
+		}
+
 		// Initialize default project.
 		err = systemkuberes.InstallDefaultProject(ctx, loopbackKubeCli)
 		if err != nil {
@@ -157,9 +167,6 @@ func (s *Server) Prepare(ctx context.Context) error {
 func (s *Server) Start(ctx context.Context) error {
 	cm := s.Manager.CtrlManager
 	mu := s.APIServer.Handler.NonGoRestfulMux
-
-	// Register UI.
-	mu.NotFoundHandler(ui.Index())
 
 	// Register /validate-*, /mutate-*.
 	err := webhooks.Setup(ctx, cm, mu)
@@ -217,11 +224,8 @@ func (s *Server) Start(ctx context.Context) error {
 		mu.Handle("/debug/flags/v", httpx.LoopbackAccessHandlerFunc(routes.StringFlagPutHandler(logs.GlogSetter)))
 	}
 
-	// Register /clis.
-	mu.HandlePrefix("/clis/", http.StripPrefix("/clis/", clis.Index()))
-
-	// Register /swagger.
-	mu.HandlePrefix("/swagger/", http.StripPrefix("/swagger/", swagger.Index()))
+	// Register extension apis.
+	mu.NotFoundHandler(webserver.Index())
 
 	// Start.
 	gp := gopool.GroupWithContextIn(ctx)

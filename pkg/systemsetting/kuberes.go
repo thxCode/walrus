@@ -13,7 +13,6 @@ import (
 	"github.com/seal-io/walrus/pkg/kubeclientset"
 	"github.com/seal-io/walrus/pkg/kubeclientset/review"
 	"github.com/seal-io/walrus/pkg/system"
-	"github.com/seal-io/walrus/pkg/systemkuberes"
 	"github.com/seal-io/walrus/pkg/systemmeta"
 )
 
@@ -44,7 +43,7 @@ func Initialize(ctx context.Context, cli clientset.Interface) error {
 		return err
 	}
 
-	secCli := cli.CoreV1().Secrets(systemkuberes.SystemNamespaceName)
+	secCli := cli.CoreV1().Secrets(DelegatedSecretNamespace)
 
 	eSec := &core.Secret{
 		ObjectMeta: meta.ObjectMeta{

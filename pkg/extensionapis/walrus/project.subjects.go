@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"golang.org/x/exp/maps"
 	rbac "k8s.io/api/rbac/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	authnuser "k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/apiserver/pkg/registry/rest"
 	ctrlcli "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -21,6 +21,10 @@ import (
 	"github.com/seal-io/walrus/pkg/systemmeta"
 )
 
+// ProjectSubjectsHandler is a handler for v1.ProjectSubjects objects,
+// which is a subresource of v1.Project objects.
+//
+// ProjectSubjectsHandler maps the rbac RoleBinding objects to the walrus v1.ProjectSubjects objects.
 type ProjectSubjectsHandler struct {
 	extensionapi.ObjectInfo
 	extensionapi.GetOperation
@@ -56,25 +60,24 @@ func (h *ProjectSubjectsHandler) New() runtime.Object {
 
 func (h *ProjectSubjectsHandler) Destroy() {}
 
-func (h *ProjectSubjectsHandler) OnGet(ctx context.Context, key types.NamespacedName, opts ctrlcli.GetOptions) (runtime.Object, error) {
+func (h *ProjectSubjectsHandler) OnGet(ctx context.Context, key types.NamespacedName, _ ctrlcli.GetOptions) (runtime.Object, error) {
 	// Validate.
 	if key.Namespace != systemkuberes.SystemNamespaceName {
 		return nil, kerrors.NewNotFound(walrus.SchemeResource("projectsubjects"), key.Name)
 	}
 
 	// List.
-	crbList := new(rbac.ClusterRoleBindingList)
-	err := h.Client.List(ctx, crbList,
-		ctrlcli.MatchingLabelsSelector{
-			Selector: systemmeta.GetResourcesLabelSelectorOfType("rolebindings"),
-		})
+	rbList := new(rbac.RoleBindingList)
+	err := h.Client.List(ctx, rbList,
+		ctrlcli.InNamespace(key.Name),
+		ctrlcli.MatchingLabelsSelector{Selector: systemmeta.GetResourcesLabelSelectorOfType("rolebindings")})
 	if err != nil {
 		return nil, kerrors.NewInternalError(err)
 	}
-	crbList = systemmeta.FilterResourceListByNotes(crbList, "project", key.Name)
+	rbList = systemmeta.FilterResourceListByNotes(rbList, "project", key.String())
 
 	// Convert.
-	psbjs := convertProjectSubjectsFromClusterRoleBindingList(crbList)
+	psbjs := convertProjectSubjectsFromRoleBindingList(rbList)
 	if psbjs == nil {
 		return nil, kerrors.NewNotFound(walrus.SchemeResource("projectsubjects"), key.Name)
 	}
@@ -90,25 +93,37 @@ func (h *ProjectSubjectsHandler) OnGet(ctx context.Context, key types.Namespaced
 	return psbjs, nil
 }
 
-func (h *ProjectSubjectsHandler) OnUpdate(ctx context.Context, obj, objOld runtime.Object, opts ctrlcli.UpdateOptions) (runtime.Object, error) {
+func (h *ProjectSubjectsHandler) OnUpdate(ctx context.Context, obj, objOld runtime.Object, _ ctrlcli.UpdateOptions) (runtime.Object, error) {
 	psbjs, psbjsOld := obj.(*walrus.ProjectSubjects), objOld.(*walrus.ProjectSubjects)
+
+	// Validate.
+	{
+		var errs field.ErrorList
+		for i, psbj := range psbjs.Items {
+			err := h.Client.Get(ctx, psbj.ToNamespacedName(), new(walrus.Subject))
+			if err != nil {
+				errs = append(errs, field.Invalid(
+					field.NewPath(fmt.Sprintf("items[%d]", i)), psbj.SubjectRef, err.Error()),
+				)
+			}
+			if err := psbj.Role.Validate(); err != nil {
+				errs = append(errs, field.Invalid(
+					field.NewPath(fmt.Sprintf("items[%d].role", i)), psbj.Role, err.Error()))
+			}
+		}
+		if len(errs) > 0 {
+			return nil, kerrors.NewInvalid(walrus.SchemeKind("projectsubjects"), psbjs.Name, errs)
+		}
+	}
 
 	// Figure out delta.
 	psbjsReverseIndex := make(map[walrus.ProjectSubject]int)
-	{
-		for i := range psbjs.Items {
-			// Default.
-			if psbjs.Items[i].Kind == "" {
-				psbjs.Items[i].Kind = "User"
-			}
-			psbjsReverseIndex[psbjs.Items[i]] = i
-		}
+	for i := range psbjs.Items {
+		psbjsReverseIndex[psbjs.Items[i]] = i
 	}
 	psbjsOldSet := make(map[walrus.ProjectSubject]sets.Empty)
-	{
-		for i := range psbjsOld.Items {
-			psbjsOldSet[psbjsOld.Items[i]] = sets.Empty{}
-		}
+	for i := range psbjsOld.Items {
+		psbjsOldSet[psbjsOld.Items[i]] = sets.Empty{}
 	}
 	for psbj := range psbjsReverseIndex {
 		// Delete the one exists in both of the new set and old set,
@@ -120,83 +135,74 @@ func (h *ProjectSubjectsHandler) OnUpdate(ctx context.Context, obj, objOld runti
 		}
 	}
 
-	// Validate.
-	var errs field.ErrorList
-	for psbj, psbjIdx := range psbjsReverseIndex {
-		if psbj.Name == "" {
-			errs = append(errs, field.Forbidden(
-				field.NewPath(fmt.Sprintf("items[%d].name", psbjIdx)), "blank string"))
-		}
-		if err := psbj.Role.Validate(); err != nil {
-			errs = append(errs, field.Invalid(
-				field.NewPath(fmt.Sprintf("items[%d].role", psbjIdx)), psbj.Role, err.Error()))
-		}
-	}
-	if len(errs) > 0 {
-		return nil, kerrors.NewInvalid(walrus.SchemeKind("projectsubjects"), psbjs.Name, errs)
+	// Revoke.
+	psbjsOld.Items = maps.Keys(psbjsOldSet)
+	err := systemauthz.RevokeProjectSubjects(ctx, h.Client, psbjsOld)
+	if err != nil {
+		return nil, kerrors.NewInternalError(fmt.Errorf("revoke project subject: %w", err))
 	}
 
-	// Unbind.
-	for psbj := range psbjsOldSet {
-		uInfo := &authnuser.DefaultInfo{
-			Name: psbj.Name,
-		}
-		err := systemauthz.UnbindProjectSubjectRoleFor(ctx, h.Client, psbj.Role, uInfo)
-		if err != nil {
-			return nil, kerrors.NewInternalError(fmt.Errorf("unbind project subject role: %w", err))
-		}
-	}
-
-	// NB(thxCode): without retrieving again,
-	// we can simply construct a Project object from the old ProjectSubjects.
-	proj := &walrus.Project{
-		ObjectMeta: psbjsOld.ObjectMeta,
-	}
-
-	// Bind.
-	for psbj := range psbjsReverseIndex {
-		uInfo := &authnuser.DefaultInfo{
-			Name: psbj.Name,
-		}
-		err := systemauthz.BindProjectSubjectRoleFor(ctx, h.Client, proj, psbj.Role, uInfo)
-		if err != nil {
-			return nil, kerrors.NewInternalError(fmt.Errorf("bind project subject role: %w", err))
-		}
+	// Grant.
+	psbjs.Items = maps.Keys(psbjsReverseIndex)
+	err = systemauthz.GrantProjectSubjects(ctx, h.Client, psbjs)
+	if err != nil {
+		return nil, kerrors.NewInternalError(fmt.Errorf("grant project subject: %w", err))
 	}
 
 	// Get.
 	return h.OnGet(ctx, ctrlcli.ObjectKeyFromObject(psbjs), ctrlcli.GetOptions{})
 }
 
-func convertProjectSubjectFromClusterRoleBinding(crb *rbac.ClusterRoleBinding) *walrus.ProjectSubject {
-	if crb == nil || len(crb.Subjects) != 1 {
+// ConvertProjectSubjectFromRoleBinding converts a rbac RoleBinding object to a walrus ProjectSubject object.
+func ConvertProjectSubjectFromRoleBinding(rb *rbac.RoleBinding) *walrus.ProjectSubject {
+	if rb == nil || rb.RoleRef.Kind != "ClusterRole" {
 		return nil
 	}
 
-	psbjr := walrus.ProjectSubjectRole(crb.RoleRef.Name)
-	if psbjr.Validate() != nil {
+	r := systemauthz.ConvertProjectRoleFromClusterRoleName(rb.RoleRef.Name)
+	if r.Validate() != nil {
+		return nil
+	}
+
+	var ns, n string
+	for _, subj := range rb.Subjects {
+		if subj.Kind != rbac.ServiceAccountKind {
+			continue
+		}
+		ns = subj.Namespace
+		if ns == "" {
+			continue
+		}
+		n = systemauthz.ConvertSubjectNameFromServiceAccountName(subj.Name)
+		if n == "" {
+			continue
+		}
+	}
+	if ns == "" || n == "" {
 		return nil
 	}
 
 	psbj := &walrus.ProjectSubject{
-		Name: crb.Subjects[0].Name,
-		Kind: crb.Subjects[0].Kind,
-		Role: psbjr,
+		SubjectRef: walrus.SubjectRef{
+			Namespace: ns,
+			Name:      n,
+		},
+		Role: r,
 	}
 	return psbj
 }
 
-func convertProjectSubjectsFromClusterRoleBindingList(crbList *rbac.ClusterRoleBindingList) *walrus.ProjectSubjects {
-	if crbList == nil {
+func convertProjectSubjectsFromRoleBindingList(rbList *rbac.RoleBindingList) *walrus.ProjectSubjects {
+	if rbList == nil {
 		return nil
 	}
 
 	psbjs := &walrus.ProjectSubjects{
-		Items: make([]walrus.ProjectSubject, 0, len(crbList.Items)),
+		Items: make([]walrus.ProjectSubject, 0, len(rbList.Items)),
 	}
 
-	for i := range crbList.Items {
-		psbj := convertProjectSubjectFromClusterRoleBinding(&crbList.Items[i])
+	for i := range rbList.Items {
+		psbj := ConvertProjectSubjectFromRoleBinding(&rbList.Items[i])
 		if psbj == nil {
 			continue
 		}

@@ -51,6 +51,14 @@ func (c *FakeWalrusV1) Settings(namespace string) v1.SettingInterface {
 	return &FakeSettings{c, namespace}
 }
 
+func (c *FakeWalrusV1) Subjects(namespace string) v1.SubjectInterface {
+	return &FakeSubjects{c, namespace}
+}
+
+func (c *FakeWalrusV1) SubjectProviders(namespace string) v1.SubjectProviderInterface {
+	return &FakeSubjectProviders{c, namespace}
+}
+
 func (c *FakeWalrusV1) Templates(namespace string) v1.TemplateInterface {
 	return &FakeTemplates{c, namespace}
 }

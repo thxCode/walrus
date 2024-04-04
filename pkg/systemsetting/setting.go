@@ -13,7 +13,6 @@ import (
 
 	"github.com/seal-io/walrus/pkg/kubeclientset"
 	"github.com/seal-io/walrus/pkg/system"
-	"github.com/seal-io/walrus/pkg/systemkuberes"
 	"github.com/seal-io/walrus/pkg/systemsetting/setting"
 )
 
@@ -69,7 +68,7 @@ func (s Setting) Configure(ctx context.Context, newVal string) error {
 	loopbackKubeCli := system.LoopbackKubeClient.Get()
 
 	// Update.
-	secCli := loopbackKubeCli.CoreV1().Secrets(systemkuberes.SystemNamespaceName)
+	secCli := loopbackKubeCli.CoreV1().Secrets(DelegatedSecretNamespace)
 	eSec := &core.Secret{
 		ObjectMeta: meta.ObjectMeta{
 			Name: DelegatedSecretName,
@@ -107,7 +106,7 @@ func (s Setting) Value(ctx context.Context) (string, error) {
 	loopbackKubeCli := system.LoopbackKubeClient.Get()
 
 	sec, err := loopbackKubeCli.CoreV1().
-		Secrets(systemkuberes.SystemNamespaceName).
+		Secrets(DelegatedSecretNamespace).
 		Get(ctx, DelegatedSecretName, meta.GetOptions{ResourceVersion: "0"})
 	if err != nil {
 		return "", fmt.Errorf("get value of setting %s: %w", s.name, err)
@@ -249,6 +248,13 @@ var (
 
 // the built-in settings for server.
 var (
+	BootstrapPasswordProvision = newSetting(
+		"bootstrap-password-provision",
+		"Indicates the provision of the bootstrap password.",
+		_SettingPropHidden,
+		setting.InitializeFrom("specified"),
+		setting.Allow,
+	)
 	ServeIdentify = newSetting(
 		"serve-identify",
 		"Indicates the UUID after server installation, "+

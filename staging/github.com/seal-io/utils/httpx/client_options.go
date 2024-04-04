@@ -17,11 +17,12 @@ type ClientOption struct {
 
 func ClientOptions() *ClientOption {
 	transport := &http.Transport{
-		Proxy:               http.ProxyFromEnvironment,
-		TLSClientConfig:     &tls.Config{MinVersion: tls.VersionTLS12},
-		DialContext:         (&net.Dialer{KeepAlive: -1}).DialContext,
-		ForceAttemptHTTP2:   true,
-		TLSHandshakeTimeout: 10 * time.Second,
+		Proxy:                 http.ProxyFromEnvironment,
+		TLSClientConfig:       &tls.Config{MinVersion: tls.VersionTLS12},
+		DialContext:           (&net.Dialer{KeepAlive: -1}).DialContext,
+		ForceAttemptHTTP2:     true,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
 	}
 
 	return &ClientOption{

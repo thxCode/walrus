@@ -9,7 +9,7 @@ import (
 
 // ProjectSubjects holds the list of ProjectSubject.
 //
-// ProjectSubjects is the subresource of Project.
+// ProjectSubjects is the subresource of Project to manage the subjects.
 //
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:apireg-gen:resource:scope="Namespaced",categories=["walrus"],shortName=["projsub"]
@@ -26,44 +26,39 @@ type ProjectSubjects struct {
 
 var _ runtime.Object = (*ProjectSubjects)(nil)
 
-// ProjectSubjectRole describes the role of project subject.
+// ProjectRole describes the role of project subject.
 // +enum
-type ProjectSubjectRole string
+type ProjectRole string
 
 const (
-	// ProjectSubjectRoleViewer is the subject role for project viewer.
-	ProjectSubjectRoleViewer ProjectSubjectRole = "walrus-project-viewer"
-	// ProjectSubjectRoleMember is the subject role for project member.
-	ProjectSubjectRoleMember ProjectSubjectRole = "walrus-project-member"
-	// ProjectSubjectRoleOwner is the subject role for project owner.
-	ProjectSubjectRoleOwner ProjectSubjectRole = "walrus-project-owner"
+	// ProjectRoleViewer is the role for project viewer.
+	ProjectRoleViewer ProjectRole = "viewer"
+	// ProjectRoleMember is the role for project member.
+	ProjectRoleMember ProjectRole = "member"
+	// ProjectRoleOwner is the role for project owner.
+	ProjectRoleOwner ProjectRole = "owner"
 )
 
-func (in ProjectSubjectRole) String() string {
+func (in ProjectRole) String() string {
 	return string(in)
 }
 
-func (in ProjectSubjectRole) Validate() error {
+func (in ProjectRole) Validate() error {
 	switch in {
-	case ProjectSubjectRoleViewer, ProjectSubjectRoleMember, ProjectSubjectRoleOwner:
+	case ProjectRoleViewer, ProjectRoleMember, ProjectRoleOwner:
 		return nil
 	default:
-		return errors.New("invalid project subject role")
+		return errors.New("invalid project role")
 	}
 }
 
 // ProjectSubject is the schema for the project subject API.
 type ProjectSubject struct {
-	/* NB(thxCode): All attributes must be comparable. */
+	// Subject is the reference to the subject.
+	SubjectRef `json:",inline"`
 
-	// Name is the name of the subject.
-	Name string `json:"name"`
-
-	// Kind is the kind of the subject.
-	Kind string `json:"kind,omitempty"`
-
-	// Role is the role of the subject.
+	// Role is the project role of the subject.
 	//
-	// +k8s:validation:enum=["walrus-project-viewer","walrus-project-member","walrus-project-owner"]
-	Role ProjectSubjectRole `json:"role"`
+	// +k8s:validation:enum=["viewer","member","owner"]
+	Role ProjectRole `json:"role"`
 }

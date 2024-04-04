@@ -7,34 +7,32 @@ import (
 	"github.com/seal-io/utils/pools/bytespool"
 )
 
-func PureJSON(w http.ResponseWriter, code int, v any) error {
+func PureJSON(w http.ResponseWriter, code int, v any) {
 	buf := bytespool.GetBuffer()
 	defer bytespool.Put(buf)
 
 	err := json.NewEncoder(buf).Encode(v)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return err
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	_, err = w.Write(buf.Bytes())
-	return err
+	_, _ = w.Write(buf.Bytes())
 }
 
-func JSON(w http.ResponseWriter, code int, v any) error {
+func JSON(w http.ResponseWriter, code int, v any) {
 	buf := bytespool.GetBuffer()
 	defer bytespool.Put(buf)
 
 	err := json.NewEncoder(buf).Encode(v)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return err
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
-	_, err = w.Write(buf.Bytes())
-	return err
+	_, _ = w.Write(buf.Bytes())
 }

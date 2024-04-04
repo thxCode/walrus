@@ -56,8 +56,8 @@ var (
 func (h *ResourceDefinitionHandler) BeforeOnCreate(ctx context.Context, obj *walrus.ResourceDefinition, opts *ctrlcli.CreateOptions) error {
 	if obj.Namespace != systemkuberes.SystemNamespaceName {
 		errs := field.ErrorList{
-			field.Invalid(field.NewPath("metadata.namespace"), obj.Namespace,
-				"resource definition namespace must be "+systemkuberes.SystemNamespaceName),
+			field.Invalid(
+				field.NewPath("metadata.namespace"), obj.Namespace, "resource definition namespace must be "+systemkuberes.SystemNamespaceName),
 		}
 		return kerrors.NewInvalid(walrus.SchemeKind("resourcedefinitions"), obj.Name, errs)
 	}

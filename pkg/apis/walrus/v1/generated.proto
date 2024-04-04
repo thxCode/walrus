@@ -185,21 +185,18 @@ message ProjectStatus {
 
 // ProjectSubject is the schema for the project subject API.
 message ProjectSubject {
-  // Name is the name of the subject.
-  optional string name = 1;
+  // Subject is the reference to the subject.
+  optional SubjectRef subjectRef = 1;
 
-  // Kind is the kind of the subject.
-  optional string kind = 2;
-
-  // Role is the role of the subject.
+  // Role is the project role of the subject.
   //
-  // +k8s:validation:enum=["walrus-project-viewer","walrus-project-member","walrus-project-owner"]
-  optional string role = 3;
+  // +k8s:validation:enum=["viewer","member","owner"]
+  optional string role = 2;
 }
 
 // ProjectSubjects holds the list of ProjectSubject.
 //
-// ProjectSubjects is the subresource of Project.
+// ProjectSubjects is the subresource of Project to manage the subjects.
 //
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:apireg-gen:resource:scope="Namespaced",categories=["walrus"],shortName=["projsub"]
@@ -354,6 +351,445 @@ message SettingStatus {
   //
   // "(sensitive)" returns if the setting is sensitive.
   optional string value = 5;
+}
+
+// Subject is the schema for the subjects API.
+//
+// +genclient
+// +genclient:onlyVerbs=create,get,list,watch,apply,update,patch,delete,deleteCollection
+// +genclient:method=Login,verb=create,subresource=login,input=SubjectLogin,result=SubjectLogin
+// +genclient:method=CreateToken,verb=create,subresource=token,input=SubjectToken,result=SubjectToken
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:apireg-gen:resource:scope="Namespaced",categories=["walrus"],shortName=["subj"]
+message Subject {
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
+
+  optional SubjectSpec spec = 2;
+}
+
+// SubjectList holds the list of Subject.
+//
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+message SubjectList {
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
+
+  repeated Subject items = 2;
+}
+
+// SubjectLogin is the subresource of the Subject resource for login request.
+//
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:apireg-gen:resource:scope="Namespaced",categories=["walrus"]
+message SubjectLogin {
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
+
+  optional SubjectLoginSpec spec = 2;
+
+  optional SubjectLoginStatus status = 3;
+}
+
+// SubjectLoginSpec defines the desired state of SubjectLogin.
+message SubjectLoginSpec {
+  // Credential is the credential of the subject,
+  // it is provided as a write-only input field.
+  //
+  // +k8s:validation:format="password"
+  optional string credential = 1;
+}
+
+// SubjectLoginStatus defines the observed state of SubjectLogin.
+message SubjectLoginStatus {
+  // Token is the token of the SubjectLogin.
+  optional string token = 1;
+}
+
+// SubjectProvider is the schema for the subject providers API.
+//
+// +genclient
+// +genclient:onlyVerbs=create,get,list,watch,apply,update,patch,delete,deleteCollection
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:apireg-gen:resource:scope="Namespaced",categories=["walrus"],shortName=["subjprov"]
+message SubjectProvider {
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
+
+  optional SubjectProviderSpec spec = 2;
+
+  optional SubjectProviderStatus status = 3;
+}
+
+// SubjectProviderBitbucketConfig defines the configuration of the Bitbucket.
+message SubjectProviderBitbucketConfig {
+  // ClientID is the client ID of the Bitbucket client.
+  optional string clientID = 1;
+
+  // ClientSecret is the client secret of the Bitbucket client.
+  optional string clientSecret = 2;
+
+  // Groups are used to filter out which groups should be matched.
+  repeated string groups = 3;
+}
+
+// SubjectProviderExternalConfig defines the configuration of the subject provider.
+message SubjectProviderExternalConfig {
+  // Ldap is the configuration of the LDAP.
+  optional SubjectProviderLdapConfig ldap = 1;
+
+  // OAuth is the configuration of the OAuth 2.0.
+  optional SubjectProviderOAuthConfig oauth = 2;
+
+  // Oidc is the configuration of the OpenID Connect.
+  optional SubjectProviderOidcConfig oidc = 3;
+
+  // Github is the configuration of the Github.
+  optional SubjectProviderGithubConfig github = 4;
+
+  // Gitlab is the configuration of the Gitlab.
+  optional SubjectProviderGitlabConfig gitlab = 5;
+
+  // Bitbucket is the configuration of the Bitbucket.
+  optional SubjectProviderBitbucketConfig bitbucket = 6;
+
+  // Gitea is the configuration of the Gitea.
+  optional SubjectProviderGiteaConfig gitea = 7;
+
+  // Google is the configuration of the Google.
+  optional SubjectProviderGoogleConfig google = 8;
+
+  // Microsoft is the configuration of the Microsoft.
+  optional SubjectProviderMicrosoftConfig microsoft = 9;
+}
+
+// SubjectProviderGiteaConfig defines the configuration of the Gitea.
+message SubjectProviderGiteaConfig {
+  // ClientID is the client ID of the Gitea client.
+  optional string clientID = 1;
+
+  // ClientSecret is the client secret of the Gitea client.
+  optional string clientSecret = 2;
+
+  // Groups is used to filter out which groups should be matched.
+  //
+  // Each item is in the form of "organization:team".
+  repeated string groups = 3;
+}
+
+// SubjectProviderGithubConfig defines the configuration of the Github.
+message SubjectProviderGithubConfig {
+  // ClientID is the client ID of the Github client.
+  optional string clientID = 1;
+
+  // ClientSecret is the client secret of the Github client.
+  optional string clientSecret = 2;
+
+  // Groups are used to filter out which groups should be matched.
+  //
+  // Each item is in the form of "organization:team".
+  repeated string groups = 3;
+}
+
+// SubjectProviderGitlabConfig defines the configuration of the Gitlab.
+message SubjectProviderGitlabConfig {
+  // ClientID is the client ID of the Gitlab client.
+  optional string clientID = 1;
+
+  // ClientSecret is the client secret of the Gitlab client.
+  optional string clientSecret = 2;
+
+  // Groups are used to filter out which groups should be matched.
+  repeated string groups = 3;
+}
+
+// SubjectProviderGoogleConfig defines the configuration of the Google.
+message SubjectProviderGoogleConfig {
+  // ClientID is the client ID of the Google client.
+  optional string clientID = 1;
+
+  // ClientSecret is the client secret of the Google client.
+  optional string clientSecret = 2;
+
+  // Groups are used to filter out which groups should be matched.
+  repeated string groups = 3;
+}
+
+// SubjectProviderLdapConfig defines the configuration of the LDAP.
+message SubjectProviderLdapConfig {
+  // Host is the host of the LDAP server,
+  // which in form of "hostname:port".
+  //
+  // If the port is not specified,
+  // the default port 636 will be used.
+  optional string host = 1;
+
+  // SkipInsecureVerify is the flag to skip the insecure verify.
+  optional bool skipInsecureVerify = 2;
+
+  // ServiceAccountDN is the distinguished name of the service account of the LDAP server.
+  // It is used to search other users.
+  optional string serviceAccountDN = 3;
+
+  // ServiceAccountPassword is the password of the service account of the LDAP server.
+  optional string serviceAccountPassword = 4;
+
+  // GroupSearch is the group search configuration of the LDAP.
+  //
+  // It maps a group to a list of users.
+  optional SubjectProviderLdapGroupSearch groupSearch = 5;
+
+  // UserSearch is the user search configuration of the LDAP.
+  //
+  // It maps a username and password entered by a user to the LDAP entry.
+  optional SubjectProviderLdapUserSearch userSearch = 6;
+}
+
+// SubjectProviderLdapGroupSearch defines the group search configuration of the LDAP.
+message SubjectProviderLdapGroupSearch {
+  // BaseDN to start the search from.
+  optional string baseDN = 1;
+
+  // Filter to apply to the search.
+  //
+  // +default="(objectClass=group)"
+  optional string filter = 2;
+
+  // UserMatchers is the user matcher list for the LDAP group search.
+  repeated SubjectProviderLdapGroupSearchUserMatcher userMatchers = 3;
+
+  // NameAttribute is the attribute to use as the group name.
+  //
+  // +default="name"
+  optional string nameAttribute = 4;
+}
+
+// SubjectProviderLdapGroupSearchUserMatcher defines the user matcher of the LDAP group search.
+message SubjectProviderLdapGroupSearchUserMatcher {
+  // GroupAttribute is the attribute of the group.
+  optional string groupAttribute = 1;
+
+  // UserAttribute is the attribute of the user.
+  optional string userAttribute = 2;
+}
+
+// SubjectProviderLdapUserSearch defines the user search configuration of the LDAP.
+message SubjectProviderLdapUserSearch {
+  // BaseDN to start the search from.
+  optional string baseDN = 1;
+
+  // Filter to apply to the search.
+  //
+  // +default="(objectClass=person)"
+  optional string filter = 2;
+
+  // NameAttribute is the attribute to use as the username.
+  //
+  // +default="uid"
+  optional string nameAttribute = 3;
+
+  // DisplayNameAttribute is the attribute to use as the display name.
+  //
+  // +default="cn"
+  optional string displayNameAttribute = 4;
+
+  // EmailAttribute is the attribute to use as the email.
+  //
+  // +default="mail"
+  optional string emailAttribute = 5;
+}
+
+// SubjectProviderList holds the list of SubjectProvider.
+//
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+message SubjectProviderList {
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
+
+  repeated SubjectProvider items = 2;
+}
+
+// SubjectProviderMicrosoftConfig defines the configuration of the Microsoft.
+message SubjectProviderMicrosoftConfig {
+  // ClientID is the client ID of the Microsoft client.
+  optional string clientID = 1;
+
+  // ClientSecret is the client secret of the Microsoft client.
+  optional string clientSecret = 2;
+
+  // Tenant is the tenant of the Microsoft client.
+  //
+  // The tenant is the directory that the user is in.
+  //
+  // +default="common"
+  // +k8s:validation:enum=["common","organizations","consumers"]
+  optional string tenant = 3;
+
+  // Groups are used to filter out which groups should be matched.
+  repeated string groups = 4;
+}
+
+// SubjectProviderOAuthClaimMapping defines the claim mapping of the OAuth.
+message SubjectProviderOAuthClaimMapping {
+  // NameKey is the key to pick "name" from claim.
+  //
+  // +default="preferred_username"
+  optional string nameKey = 1;
+
+  // DisplayNameKey is the key to pick "displayName" from claim.
+  //
+  // +default="name"
+  optional string displayNameKey = 2;
+
+  // EmailKey is the key to pick "email" from claim.
+  //
+  // +default="email"
+  optional string emailKey = 3;
+
+  // GroupsKey is the key to pick "groups" from claim.
+  //
+  // +default="groups"
+  optional string groupsKey = 4;
+}
+
+// SubjectProviderOAuthConfig defines the configuration of the OAuth 2.0.
+message SubjectProviderOAuthConfig {
+  // AuthorizationEndpoint is the endpoint to authorize.
+  optional string authorizationEndpoint = 1;
+
+  // TokenEndpoint is the endpoint to get OAuth token.
+  optional string tokenEndpoint = 2;
+
+  // UserinfoEndpoint is the endpoint to get the user info.
+  optional string userinfoEndpoint = 3;
+
+  // SkipInsecureVerify is the flag to skip the insecure verify.
+  optional bool skipInsecureVerify = 4;
+
+  // ClientID is the ID of the OAuth client.
+  optional string clientID = 5;
+
+  // ClientSecret is the secret of the OAuth client.
+  optional string clientSecret = 6;
+
+  // ClaimMapping is the claim mapping of the OpenID Connect.
+  optional SubjectProviderOAuthClaimMapping claimMapping = 7;
+}
+
+// SubjectProviderOidcConfig defines the configuration of the OpenID Connect.
+message SubjectProviderOidcConfig {
+  // Issuer is the URL of the OpenID Connect issuer.
+  //
+  // This field is only used when the provider is set to "custom".
+  //
+  // Canonical URL of the provider, also used for configuration discovery.
+  // This value MUST match the value returned in the provider config discovery.
+  //
+  // See: https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig
+  optional string issuer = 1;
+
+  // SkipInsecureVerify is the flag to skip the insecure verify.
+  optional bool skipInsecureVerify = 2;
+
+  // ClientID is the client ID of the OpenID Connect client.
+  optional string clientID = 3;
+
+  // ClientSecret is the client secret of the OpenID Connect client.
+  optional string clientSecret = 4;
+
+  // ClaimMapping is the claim mapping of the OpenID Connect.
+  optional SubjectProviderOAuthClaimMapping claimMapping = 5;
+}
+
+// SubjectProviderSpec defines the desired state of SubjectProvider.
+message SubjectProviderSpec {
+  // Type is the type of the subject provider,
+  // which is immutable.
+  //
+  // +k8s:validation:enum=["internal","ldap","oidc","oauth","github","gitlab","bitbucket","gitea","google","microsoft"]
+  optional string type = 1;
+
+  // DisplayName is the display name of the subject provider.
+  optional string displayName = 2;
+
+  // Description is the description of the subject provider.
+  optional string description = 3;
+
+  // ExternalConfig is the configuration of the external subject provider.
+  optional SubjectProviderExternalConfig externalConfig = 4;
+}
+
+// SubjectProviderStatus defines the observed state of SubjectProvider.
+message SubjectProviderStatus {
+  // LoginWithPassword is the flag to indicate whether the provider supports login with password.
+  optional bool loginWithPassword = 1;
+}
+
+// SubjectRef is the reference of the subject.
+message SubjectRef {
+  optional string namespace = 1;
+
+  optional string name = 2;
+}
+
+// SubjectSpec defines the desired state of Subject.
+message SubjectSpec {
+  // Provider is the name of subject provider who provides this subject,
+  // which is immutable.
+  optional string provider = 1;
+
+  // Role is the role of the subject.
+  //
+  // +k8s:validation:enum=["viewer","manager","admin"]
+  optional string role = 2;
+
+  // DisplayName is the display name of the subject.
+  optional string displayName = 3;
+
+  // Description is the description of the subject.
+  optional string description = 4;
+
+  // Email is the email of the subject.
+  //
+  // +k8s:validation:format="email"
+  optional string email = 5;
+
+  // Groups is the groups that the subject belongs to.
+  //
+  // +k8s:validation:uniqueItems=true
+  repeated string groups = 6;
+
+  // Credential is the credential of the subject,
+  // it is provided as a write-only input field.
+  //
+  // +k8s:validation:format="password"
+  optional string credential = 7;
+}
+
+// SubjectToken is the subresource of the Subject resource for token request.
+//
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:apireg-gen:resource:scope="Namespaced",categories=["walrus"]
+message SubjectToken {
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
+
+  // +optional
+  optional SubjectTokenSpec spec = 2;
+
+  optional SubjectTokenStatus status = 3;
+}
+
+// SubjectTokenSpec defines the desired state of SubjectToken.
+message SubjectTokenSpec {
+  // ExpirationSeconds is the requested duration of validity of the request. The
+  // token issuer may return a token with a different validity duration so a
+  // client needs to check the 'expiration' field in a response.
+  // +optional
+  optional int64 expirationSeconds = 1;
+}
+
+// SubjectTokenStatus defines the observed state of SubjectToken.
+message SubjectTokenStatus {
+  // Token is the token of the SubjectToken.
+  optional string token = 1;
+
+  // ExpirationTimestamp is the time of expiration of the returned token.
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time expirationTimestamp = 2;
 }
 
 // Template is the schema for the templates API.

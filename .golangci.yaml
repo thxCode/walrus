@@ -133,6 +133,8 @@ linters-settings:
         alias: ctrlmetricsrv
       - pkg: sigs.k8s.io/controller-runtime/pkg/metrics
         alias: ctrlmetrics
+      - pkg: sigs.k8s.io/controller-runtime/pkg/predicate
+        alias: ctrlpredicate
       - pkg: sigs.k8s.io/controller-runtime/pkg/controller/controllerutil
         alias: ctrlutil
   lll:

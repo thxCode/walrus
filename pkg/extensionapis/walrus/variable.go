@@ -146,8 +146,8 @@ func (h *VariableHandler) OnCreate(ctx context.Context, obj runtime.Object, opts
 		switch resType {
 		default:
 			errs := field.ErrorList{
-				field.Invalid(field.NewPath("metadata.namespace"),
-					vra.Namespace, "namespace is not a project or environment"),
+				field.Invalid(
+					field.NewPath("metadata.namespace"), vra.Namespace, "namespace is not a project or environment"),
 			}
 			return nil, kerrors.NewInvalid(walrus.SchemeKind("variables"), vra.Name, errs)
 		case "projects":
@@ -157,8 +157,8 @@ func (h *VariableHandler) OnCreate(ctx context.Context, obj runtime.Object, opts
 			proj := kubemeta.GetOwnerRefOfNoCopy(owner, walrus.SchemeGroupVersionKind("Project"))
 			if proj == nil {
 				errs := field.ErrorList{
-					field.Invalid(field.NewPath("metadata.namespace"),
-						vra.Namespace, "environment is not belong to any project"),
+					field.Invalid(
+						field.NewPath("metadata.namespace"), vra.Namespace, "environment is not belong to any project"),
 				}
 				return nil, kerrors.NewInvalid(walrus.SchemeKind("variables"), vra.Name, errs)
 			}

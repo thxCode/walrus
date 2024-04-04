@@ -19,7 +19,7 @@ func installHermitCrab(ctx context.Context, cli *helm.Client, globalValuesContex
 	// - github.com/seal-io/helm-charts/charts/walrus.
 
 	name := "hermitcrab"
-	version := "0.1.3"
+	version := "0.1.4"
 	if disable.Has(name) {
 		return nil
 	}
@@ -41,7 +41,7 @@ commonAnnotations:
 hermitcrab:
   image:
     repository: "sealio/hermitcrab"
-    tag: "v0.1.3"
+    tag: "v0.1.4"
 {{ if .Env }}
   env: {{ toYaml .Env | nindent 2 }}
 {{ end }}

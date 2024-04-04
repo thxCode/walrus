@@ -27,6 +27,7 @@ type Options struct {
 	ManagerOptions *manager.Options
 
 	// Control.
+	BootstrapPassword   string
 	DisableAuths        bool
 	DisableApplications []string
 
@@ -52,6 +53,7 @@ func NewOptions() *Options {
 		ManagerOptions: mgrOptions,
 
 		// Control.
+		BootstrapPassword:   "",
 		DisableAuths:        false,
 		DisableApplications: []string{},
 
@@ -74,6 +76,9 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	o.ManagerOptions.AddFlags(fs)
 
 	// Control.
+	fs.StringVar(&o.BootstrapPassword, "bootstrap-password", o.BootstrapPassword,
+		"the password to bootstrap instead of random generating, "+
+			"it is used to create the administrator account.")
 	fs.BoolVar(&o.DisableAuths, "disable-auths", o.DisableAuths,
 		"disable authentication and authorization.")
 	fs.StringSliceVar(&o.DisableApplications, "disable-applications", o.DisableApplications,
@@ -108,6 +113,16 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 func (o *Options) Validate(ctx context.Context) error {
 	if err := o.ManagerOptions.Validate(ctx); err != nil {
 		return err
+	}
+
+	// Control.
+	if o.BootstrapPassword != "" {
+		switch {
+		case len(o.BootstrapPassword) < 8:
+			return errors.New("--bootstrap-password: less than 8 characters")
+		case len(o.BootstrapPassword) > 72:
+			return errors.New("--bootstrap-password: greater than 72 characters")
+		}
 	}
 
 	if !o.DisableAuths {
@@ -148,7 +163,7 @@ func (o *Options) Complete(ctx context.Context) (*Config, error) {
 		return nil, err
 	}
 
-	system.ConfigureDisallowApplications(o.DisableApplications)
+	system.ConfigureControl(o.BootstrapPassword, o.DisableAuths, o.DisableApplications)
 
 	serve := &genericoptions.SecureServingOptions{
 		BindAddress: o.ManagerOptions.BindAddress,
@@ -216,9 +231,10 @@ func (o *Options) Complete(ctx context.Context) (*Config, error) {
 				"/", "/assets/*", "/favicon.ico", // UI assets
 				"/mutate-*", "/validate-*", // Webhooks
 				"/livez", "/readyz", "/metrics", "/debug/*", // Measure
-				"/clis/*",    // CLI binaries
-				"/openapi/*", // OpenAPI
-				"/swagger/*", // Swagger
+				"/clis/*",     // CLI binaries
+				"/openapi/*",  // OpenAPI
+				"/swagger/*",  // Swagger
+				"/identify/*", // Identify
 			},
 		}
 	}

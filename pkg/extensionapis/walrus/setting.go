@@ -274,8 +274,10 @@ func (h *SettingHandler) OnUpdate(ctx context.Context, obj, _ runtime.Object, op
 			errors.New("setting is not editable"))
 	}
 	if set.Spec.Value == nil {
-		return nil, kerrors.NewInvalid(walrus.SchemeKind("settings"), set.Name,
-			field.ErrorList{field.Required(field.NewPath("spec.value"), "setting value is required")})
+		errs := field.ErrorList{
+			field.Required(field.NewPath("spec.value"), "setting value is required"),
+		}
+		return nil, kerrors.NewInvalid(walrus.SchemeKind("settings"), set.Name, errs)
 	}
 
 	// Update.

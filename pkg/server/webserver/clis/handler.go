@@ -6,13 +6,19 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/gorilla/mux"
 	"github.com/seal-io/utils/httpx"
 	"github.com/seal-io/utils/osx"
 
 	"github.com/seal-io/walrus/pkg/system"
 )
 
-func Index() http.Handler {
+func Route(r *mux.Route) {
+	p, _ := r.GetPathTemplate()
+	r.Handler(http.StripPrefix(p, index()))
+}
+
+func index() http.Handler {
 	dir := system.SubLibDir("clis")
 
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {

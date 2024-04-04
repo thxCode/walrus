@@ -5,16 +5,22 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/seal-io/utils/httpx"
 )
 
-func Index() http.Handler {
+func Route(r *mux.Route) {
+	p, _ := r.GetPathTemplate()
+	r.Handler(http.StripPrefix(p, index()))
+}
+
+func index() http.Handler {
 	srv := http.FileServer(httpx.FS(ui, httpx.FSOptions().WithEmbedded()))
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "", "index", "index.html":
-			_, _ = fmt.Fprint(w, index)
+		case "/", "/index.html":
+			_, _ = fmt.Fprint(w, indexPage)
 		default:
 			srv.ServeHTTP(w, r)
 		}
@@ -26,7 +32,7 @@ func Index() http.Handler {
 //go:embed ui/*
 var ui embed.FS
 
-const index = `
+const indexPage = `
 <!DOCTYPE html>
 <html lang="en">
 	<head>

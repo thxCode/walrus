@@ -373,7 +373,10 @@ func CreateWithCtrlClient[T MetaObject](ctx context.Context, cli ctrlcli.Client,
 			FieldManager: co.FieldManager,
 			Raw:          ptr.To(co.CreateOptions),
 		})
-		if err != nil && kerrors.IsAlreadyExists(err) {
+		if err == nil {
+			return expected, nil
+		}
+		if kerrors.IsAlreadyExists(err) {
 			// Retry on already existed if:
 			// - configure align function.
 			// - configure compare function.

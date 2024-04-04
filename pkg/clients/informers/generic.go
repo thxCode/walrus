@@ -188,6 +188,10 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Walrus().V1().ResourceRuns().Informer()}, nil
 	case walrusv1.SchemeGroupVersion.WithResource("settings"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Walrus().V1().Settings().Informer()}, nil
+	case walrusv1.SchemeGroupVersion.WithResource("subjects"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Walrus().V1().Subjects().Informer()}, nil
+	case walrusv1.SchemeGroupVersion.WithResource("subjectproviders"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Walrus().V1().SubjectProviders().Informer()}, nil
 	case walrusv1.SchemeGroupVersion.WithResource("templates"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Walrus().V1().Templates().Informer()}, nil
 	case walrusv1.SchemeGroupVersion.WithResource("variables"):

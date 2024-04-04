@@ -146,6 +146,8 @@ func (s ListOperation) List(
 	ctx context.Context,
 	options *metainternal.ListOptions,
 ) (runtime.Object, error) {
+	_, isCurdProxy := s.Handler.(isCurdProxyHandler)
+
 	if options == nil {
 		options = &metainternal.ListOptions{ResourceVersion: "0"}
 	}
@@ -157,7 +159,7 @@ func (s ListOperation) List(
 
 	if listObj == nil {
 		listObj = s.Handler.NewList()
-	} else {
+	} else if !isCurdProxy {
 		// Get the highest revision from the list items.
 		items, _ := kmeta.ExtractList(listObj)
 		if len(items) != 0 {
@@ -208,6 +210,8 @@ func (s ListWatchOperation) Watch(
 	ctx context.Context,
 	options *metainternal.ListOptions,
 ) (watch.Interface, error) {
+	_, isCurdProxy := s.Handler.(isCurdProxyHandler)
+
 	if options == nil {
 		options = &metainternal.ListOptions{ResourceVersion: "0", Watch: true}
 	}
@@ -244,19 +248,15 @@ func (s ListWatchOperation) Watch(
 					continue
 				}
 
-				// Process bookmark.
-				if e.Type == watch.Bookmark {
-					c <- e
-					continue
-				}
-
-				// Record the highest revision.
-				om, err := kmeta.Accessor(e.Object)
-				if err == nil {
-					swapped := wm.SwapResourceVersion(om.GetResourceVersion())
-					if !swapped {
-						// If the revision is not updated, ignore the event.
-						continue
+				// Record the highest revision if not a proxy.
+				if !isCurdProxy {
+					om, err := kmeta.Accessor(e.Object)
+					if err == nil {
+						swapped := wm.SwapResourceVersion(om.GetResourceVersion())
+						if !swapped {
+							// If the revision is not updated, ignore the event.
+							continue
+						}
 					}
 				}
 
@@ -415,12 +415,10 @@ func (s UpdateOperation) Update(
 
 	if om.GetResourceVersion() == "" {
 		gk := qualifiedKindFromContext(ctx)
-		dt := field.Invalid(
-			field.NewPath("metadata.resourceVersion"),
-			0,
-			"must be specified for an update",
-		)
-		return nil, false, kerrors.NewInvalid(gk, name, field.ErrorList{dt})
+		errs := field.ErrorList{field.Invalid(
+			field.NewPath("metadata.resourceVersion"), 0, "must be specified for an update",
+		)}
+		return nil, false, kerrors.NewInvalid(gk, name, errs)
 	}
 
 	if s.BeforeUpdate != nil {
@@ -1022,6 +1020,12 @@ func (h _CurdProxyHandler[DO, DOL, UO, UOL]) OnDelete(
 	uo := h.CastObjectTo(obj.(DO))
 	return h.CtrlCli.Delete(ctx, uo, &opts)
 }
+
+type isCurdProxyHandler interface {
+	isCurdProxy()
+}
+
+func (h _CurdProxyHandler[DO, DOL, UO, UOL]) isCurdProxy() {}
 
 func qualifiedResourceFromContext(ctx context.Context) schema.GroupResource {
 	ri, _ := genericapirequest.RequestInfoFrom(ctx)

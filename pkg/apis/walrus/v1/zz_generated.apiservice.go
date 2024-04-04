@@ -454,6 +454,138 @@ func (*Setting) Categories() []string {
 	}
 }
 
+var _ rest.Scoper = (*Subject)(nil)
+
+func (*Subject) NamespaceScoped() bool {
+	return true
+}
+
+var _ rest.KindProvider = (*Subject)(nil)
+
+func (*Subject) Kind() string {
+	return "Subject"
+}
+
+var _ rest.SingularNameProvider = (*Subject)(nil)
+
+func (*Subject) GetSingularName() string {
+	return "subject"
+}
+
+var _ rest.ShortNamesProvider = (*Subject)(nil)
+
+func (*Subject) ShortNames() []string {
+	return []string{
+		"subj",
+	}
+}
+
+var _ rest.CategoriesProvider = (*Subject)(nil)
+
+func (*Subject) Categories() []string {
+	return []string{
+		"walrus",
+	}
+}
+
+var _ rest.Scoper = (*SubjectLogin)(nil)
+
+func (*SubjectLogin) NamespaceScoped() bool {
+	return true
+}
+
+var _ rest.KindProvider = (*SubjectLogin)(nil)
+
+func (*SubjectLogin) Kind() string {
+	return "SubjectLogin"
+}
+
+var _ rest.SingularNameProvider = (*SubjectLogin)(nil)
+
+func (*SubjectLogin) GetSingularName() string {
+	return "subjectlogin"
+}
+
+var _ rest.ShortNamesProvider = (*SubjectLogin)(nil)
+
+func (*SubjectLogin) ShortNames() []string {
+	return []string{}
+}
+
+var _ rest.CategoriesProvider = (*SubjectLogin)(nil)
+
+func (*SubjectLogin) Categories() []string {
+	return []string{
+		"walrus",
+	}
+}
+
+var _ rest.Scoper = (*SubjectProvider)(nil)
+
+func (*SubjectProvider) NamespaceScoped() bool {
+	return true
+}
+
+var _ rest.KindProvider = (*SubjectProvider)(nil)
+
+func (*SubjectProvider) Kind() string {
+	return "SubjectProvider"
+}
+
+var _ rest.SingularNameProvider = (*SubjectProvider)(nil)
+
+func (*SubjectProvider) GetSingularName() string {
+	return "subjectprovider"
+}
+
+var _ rest.ShortNamesProvider = (*SubjectProvider)(nil)
+
+func (*SubjectProvider) ShortNames() []string {
+	return []string{
+		"subjprov",
+	}
+}
+
+var _ rest.CategoriesProvider = (*SubjectProvider)(nil)
+
+func (*SubjectProvider) Categories() []string {
+	return []string{
+		"walrus",
+	}
+}
+
+var _ rest.Scoper = (*SubjectToken)(nil)
+
+func (*SubjectToken) NamespaceScoped() bool {
+	return true
+}
+
+var _ rest.KindProvider = (*SubjectToken)(nil)
+
+func (*SubjectToken) Kind() string {
+	return "SubjectToken"
+}
+
+var _ rest.SingularNameProvider = (*SubjectToken)(nil)
+
+func (*SubjectToken) GetSingularName() string {
+	return "subjecttoken"
+}
+
+var _ rest.ShortNamesProvider = (*SubjectToken)(nil)
+
+func (*SubjectToken) ShortNames() []string {
+	return []string{}
+}
+
+var _ rest.CategoriesProvider = (*SubjectToken)(nil)
+
+func (*SubjectToken) Categories() []string {
+	return []string{
+		"walrus",
+	}
+}
+
 var _ rest.Scoper = (*Template)(nil)
 
 func (*Template) NamespaceScoped() bool {

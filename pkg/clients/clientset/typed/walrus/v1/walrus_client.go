@@ -24,6 +24,8 @@ type WalrusV1Interface interface {
 	ResourceDefinitionsGetter
 	ResourceRunsGetter
 	SettingsGetter
+	SubjectsGetter
+	SubjectProvidersGetter
 	TemplatesGetter
 	VariablesGetter
 }
@@ -67,6 +69,14 @@ func (c *WalrusV1Client) ResourceRuns(namespace string) ResourceRunInterface {
 
 func (c *WalrusV1Client) Settings(namespace string) SettingInterface {
 	return newSettings(c, namespace)
+}
+
+func (c *WalrusV1Client) Subjects(namespace string) SubjectInterface {
+	return newSubjects(c, namespace)
+}
+
+func (c *WalrusV1Client) SubjectProviders(namespace string) SubjectProviderInterface {
+	return newSubjectProviders(c, namespace)
 }
 
 func (c *WalrusV1Client) Templates(namespace string) TemplateInterface {

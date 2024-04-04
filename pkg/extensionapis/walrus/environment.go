@@ -16,7 +16,6 @@ import (
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/apimachinery/pkg/watch"
@@ -26,7 +25,6 @@ import (
 	walrus "github.com/seal-io/walrus/pkg/apis/walrus/v1"
 	"github.com/seal-io/walrus/pkg/extensionapi"
 	"github.com/seal-io/walrus/pkg/kubemeta"
-	"github.com/seal-io/walrus/pkg/systemauthz"
 	"github.com/seal-io/walrus/pkg/systemkuberes"
 	"github.com/seal-io/walrus/pkg/systemmeta"
 )
@@ -174,12 +172,6 @@ func (h *EnvironmentHandler) OnCreate(ctx context.Context, obj runtime.Object, o
 			return nil, err
 		}
 		env = convertEnvironmentFromNamespace(ns)
-	}
-
-	// Create RBAC.
-	err = systemauthz.CreateEnvironmentSpace(ctx, h.Client, env)
-	if err != nil {
-		return nil, kerrors.NewInternalError(fmt.Errorf("create environment space: %w", err))
 	}
 
 	return env, nil
@@ -335,6 +327,10 @@ func (h *EnvironmentHandler) OnDelete(ctx context.Context, obj runtime.Object, o
 
 	// Validate.
 	{
+		// Prevent deleting default project.
+		if env.Name == systemkuberes.DefaultEnvironmentName {
+			return kerrors.NewBadRequest("default-local environment is reserved")
+		}
 		// Prevent deleting if it has resources.
 		resList := new(walrus.ResourceList)
 		err := h.Client.List(ctx, resList, &ctrlcli.ListOptions{
@@ -366,14 +362,7 @@ func (h *EnvironmentHandler) OnDelete(ctx context.Context, obj runtime.Object, o
 		// we ignore the not found error after we unlock it.
 		return nil
 	}
-
-	// Delete RBAC.
-	err = systemauthz.DeleteEnvironmentSpace(ctx, h.Client, env)
-	if err != nil {
-		return kerrors.NewInternalError(fmt.Errorf("delete environment space: %w", err))
-	}
-
-	return nil
+	return err
 }
 
 func convertNamespaceListOptsFromEnvironmentListOpts(in ctrlcli.ListOptions) (out *ctrlcli.ListOptions) {
@@ -381,9 +370,7 @@ func convertNamespaceListOptsFromEnvironmentListOpts(in ctrlcli.ListOptions) (ou
 	in.Namespace = ""
 	if in.FieldSelector != nil {
 		reqs := slices.DeleteFunc(in.FieldSelector.Requirements(), func(req fields.Requirement) bool {
-			return req.Field == "metadata.namespace" &&
-				((req.Operator == selection.Equals && req.Value == systemkuberes.SystemNamespaceName) ||
-					(req.Operator == selection.NotEquals && req.Value != systemkuberes.SystemNamespaceName))
+			return req.Field == "metadata.namespace"
 		})
 		if len(reqs) == 0 {
 			in.FieldSelector = nil

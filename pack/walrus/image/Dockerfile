@@ -129,12 +129,12 @@ ADD https://charts.bitnami.com/bitnami/minio-14.1.3.tgz "${WALRUS_LID_DIR}/chart
 ## - pkg/systemkubres/helmcharts.go.
 ENV DEPLOYER_TERRAFORM_IMAGE="sealio/terraform-deployer:v1.5.7-seal.1" \
     DEPLOYER_OPENTOFU_IMAGE="sealio/opentofu-deployer:v1.6.0-seal.1" \
-    DEPLOYER_TERRAFORM_NETWORK_MIRROR_IMAGE="sealio/hermitcrab:v0.1.3"
+    DEPLOYER_TERRAFORM_NETWORK_MIRROR_IMAGE="sealio/hermitcrab:v0.1.4"
 RUN set -exo pipefail; \
     crane pull --platform=${TARGETPLATFORM} ${DEPLOYER_TERRAFORM_IMAGE} ${K3S_DATA_DIR}/agent/images/deployer-terraform.tar; \
     crane pull --platform=${TARGETPLATFORM} ${DEPLOYER_OPENTOFU_IMAGE} ${K3S_DATA_DIR}/agent/images/deployer-opentofu.tar; \
     crane pull --platform=${TARGETPLATFORM} ${DEPLOYER_TERRAFORM_NETWORK_MIRROR_IMAGE} ${K3S_DATA_DIR}/agent/images/deployer-terraform-network-mirror.tar
-ADD https://github.com/seal-io/helm-charts/releases/download/hermitcrab-0.1.3/hermitcrab-0.1.3.tgz "${WALRUS_LID_DIR}/charts/hermitcrab.tgz"
+ADD https://github.com/seal-io/helm-charts/releases/download/hermitcrab-0.1.4/hermitcrab-0.1.4.tgz "${WALRUS_LID_DIR}/charts/hermitcrab.tgz"
 
 # get cli
 COPY /build/walrus-cli* ${WALRUS_LID_DIR}/clis/

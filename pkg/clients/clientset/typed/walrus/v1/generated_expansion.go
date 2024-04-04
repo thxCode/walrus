@@ -23,6 +23,10 @@ type ResourceRunExpansion interface{}
 
 type SettingExpansion interface{}
 
+type SubjectExpansion interface{}
+
+type SubjectProviderExpansion interface{}
+
 type TemplateExpansion interface{}
 
 type VariableExpansion interface{}

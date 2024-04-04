@@ -20,7 +20,7 @@ func (f LoopbackAccessHandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Requ
 	}
 
 	if !isLoopBackAccessing(r) {
-		w.WriteHeader(http.StatusNotFound)
+		http.NotFound(w, r)
 		return
 	}
 

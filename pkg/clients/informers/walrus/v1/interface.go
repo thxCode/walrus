@@ -27,6 +27,10 @@ type Interface interface {
 	ResourceRuns() ResourceRunInformer
 	// Settings returns a SettingInformer.
 	Settings() SettingInformer
+	// Subjects returns a SubjectInformer.
+	Subjects() SubjectInformer
+	// SubjectProviders returns a SubjectProviderInformer.
+	SubjectProviders() SubjectProviderInformer
 	// Templates returns a TemplateInformer.
 	Templates() TemplateInformer
 	// Variables returns a VariableInformer.
@@ -82,6 +86,16 @@ func (v *version) ResourceRuns() ResourceRunInformer {
 // Settings returns a SettingInformer.
 func (v *version) Settings() SettingInformer {
 	return &settingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// Subjects returns a SubjectInformer.
+func (v *version) Subjects() SubjectInformer {
+	return &subjectInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// SubjectProviders returns a SubjectProviderInformer.
+func (v *version) SubjectProviders() SubjectProviderInformer {
+	return &subjectProviderInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // Templates returns a TemplateInformer.

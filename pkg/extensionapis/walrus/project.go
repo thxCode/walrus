@@ -2,7 +2,6 @@ package walrus
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"slices"
 	"sort"
@@ -15,7 +14,6 @@ import (
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/apimachinery/pkg/watch"
@@ -85,10 +83,8 @@ func (h *ProjectHandler) SetupHandler(
 	h.Client = opts.Manager.GetClient()
 
 	// Create subresource handlers.
-	srs = map[string]rest.Storage{}
-	{
-		// Handle /subjects.
-		srs["subjects"] = newProjectSubjectsHandler(opts)
+	srs = map[string]rest.Storage{
+		"subjects": newProjectSubjectsHandler(opts),
 	}
 
 	return
@@ -119,12 +115,12 @@ func (h *ProjectHandler) OnCreate(ctx context.Context, obj runtime.Object, opts 
 	{
 		var errs field.ErrorList
 		if proj.Namespace != systemkuberes.SystemNamespaceName {
-			errs = append(errs, field.Invalid(field.NewPath("metadata.namespace"),
-				proj.Namespace, "project namespace must be "+systemkuberes.SystemNamespaceName))
+			errs = append(errs, field.Invalid(
+				field.NewPath("metadata.namespace"), proj.Namespace, "project namespace must be "+systemkuberes.SystemNamespaceName))
 		}
 		if slices.Contains([]string{"kube-system", "kube-public"}, proj.Name) {
-			errs = append(errs, field.Invalid(field.NewPath("metadata.name"),
-				proj.Name, "project name is reserved"))
+			errs = append(errs, field.Invalid(
+				field.NewPath("metadata.name"), proj.Name, "project name is reserved"))
 		}
 		if stringx.StringWidth(proj.Name) > 30 {
 			errs = append(errs, field.TooLongMaxLength(
@@ -147,6 +143,10 @@ func (h *ProjectHandler) OnCreate(ctx context.Context, obj runtime.Object, opts 
 	if proj.Name == systemkuberes.DefaultProjectName {
 		// NB(thxCode): The default project is created by the system,
 		// so we need another approach to adopt the default project.
+		_, err := h.OnGet(ctx, ctrlcli.ObjectKeyFromObject(proj), ctrlcli.GetOptions{})
+		if err == nil {
+			return nil, kerrors.NewAlreadyExists(walrus.SchemeResource("projects"), proj.Name)
+		}
 		ns := convertNamespaceFromProject(proj)
 		{
 			// Refill UID and ResourceVersion.
@@ -158,7 +158,7 @@ func (h *ProjectHandler) OnCreate(ctx context.Context, obj runtime.Object, opts 
 			ns.UID = aNs.UID
 			ns.ResourceVersion = aNs.ResourceVersion
 		}
-		err := h.Client.Update(ctx, ns)
+		err = h.Client.Update(ctx, ns)
 		if err != nil {
 			return nil, kerrors.NewInternalError(fmt.Errorf("create default project: %w", err))
 		}
@@ -172,10 +172,10 @@ func (h *ProjectHandler) OnCreate(ctx context.Context, obj runtime.Object, opts 
 		proj = convertProjectFromNamespace(ns)
 	}
 
-	// Create RBAC.
-	err := systemauthz.CreateProjectSpace(ctx, h.Client, proj)
+	// Grant.
+	err := systemauthz.GrantProjectSubjectRole(ctx, h.Client, proj, walrus.ProjectRoleOwner)
 	if err != nil {
-		return nil, kerrors.NewInternalError(fmt.Errorf("create project space: %w", err))
+		return nil, kerrors.NewInternalError(err)
 	}
 
 	return proj, nil
@@ -257,6 +257,12 @@ func (h *ProjectHandler) OnWatch(ctx context.Context, opts ctrlcli.ListOptions) 
 					continue
 				}
 
+				// Ignore if not be selected by `kubectl get --field-selector=metadata.namespace=...`.
+				if fs := opts.FieldSelector; fs != nil &&
+					!fs.Matches(fields.Set{"metadata.namespace": proj.Namespace}) {
+					continue
+				}
+
 				// Dispatch.
 				e.Object = proj
 				c <- e
@@ -333,20 +339,8 @@ func (h *ProjectHandler) OnDelete(ctx context.Context, obj runtime.Object, opts 
 	// Validate.
 	{
 		// Prevent deleting default project.
-		if proj.Name == core.NamespaceDefault {
-			return kerrors.NewBadRequest("cannot delete default project")
-		}
-		// Prevent deleting if it has environments.
-		envList := new(walrus.EnvironmentList)
-		err := h.Client.List(ctx, envList, &ctrlcli.ListOptions{
-			Namespace: proj.Name,
-		})
-		if err != nil {
-			return kerrors.NewInternalError(fmt.Errorf("list environments below the project: %w", err))
-		}
-		if len(envList.Items) != 0 {
-			return kerrors.NewConflict(walrus.SchemeResource("projects"), proj.Name,
-				errors.New("project has environments"))
+		if proj.Name == systemkuberes.DefaultProjectName {
+			return kerrors.NewBadRequest("default project is reserved")
 		}
 	}
 
@@ -379,9 +373,7 @@ func convertNamespaceListOptsFromProjectListOpts(in ctrlcli.ListOptions) (out *c
 	in.Namespace = ""
 	if in.FieldSelector != nil {
 		reqs := slices.DeleteFunc(in.FieldSelector.Requirements(), func(req fields.Requirement) bool {
-			return req.Field == "metadata.namespace" &&
-				((req.Operator == selection.Equals && req.Value == systemkuberes.SystemNamespaceName) ||
-					(req.Operator == selection.NotEquals && req.Value != systemkuberes.SystemNamespaceName))
+			return req.Field == "metadata.namespace"
 		})
 		if len(reqs) == 0 {
 			in.FieldSelector = nil
@@ -468,6 +460,11 @@ func convertProjectListFromNamespaceList(nsList *core.NamespaceList, opts ctrlcl
 	for i := range nsList.Items {
 		proj := safeConvertProjectFromNamespace(&nsList.Items[i], opts.Namespace)
 		if proj == nil {
+			continue
+		}
+		// Ignore if not be selected by `kubectl get --field-selector=metadata.namespace=...`.
+		if fs := opts.FieldSelector; fs != nil &&
+			!fs.Matches(fields.Set{"metadata.namespace": proj.Namespace}) {
 			continue
 		}
 		pList.Items = append(pList.Items, *proj)

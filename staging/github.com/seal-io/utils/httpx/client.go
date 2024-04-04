@@ -2,8 +2,11 @@ package httpx
 
 import (
 	"context"
+	"crypto/tls"
 	"io"
+	"net"
 	"net/http"
+	"time"
 
 	"github.com/henvic/httpretty"
 
@@ -13,7 +16,32 @@ import (
 // DefaultClient is the default http.Client used by the package.
 //
 // It is used for requests pooling.
-var DefaultClient = http.DefaultClient
+var DefaultClient = &http.Client{
+	Transport: http.DefaultTransport,
+}
+
+// DefaultInsecureClient is the default http.Client used by the package,
+// with TLS insecure skip verify.
+//
+// It is used for requests pooling.
+var DefaultInsecureClient = &http.Client{
+	Transport: &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		TLSClientConfig: &tls.Config{
+			MinVersion:         tls.VersionTLS12,
+			InsecureSkipVerify: true, // nolint:gosec
+		},
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	},
+}
 
 // Client returns a new http.Client with the given options,
 // the result http.Client is used for fast-consuming requests.

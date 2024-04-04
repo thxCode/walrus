@@ -82,7 +82,7 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 		"the port on which to serve HTTPS.")
 	fs.StringVar(&o.CertDir, "cert-dir", o.CertDir,
 		"the directory where the TLS certs are located. "+
-			"if provided, must place tls.crt and tls.key under --cert-dir. ")
+			"if provided, must place tls.crt and tls.key under --cert-dir.")
 
 	// Control.
 	fs.IntVar(&o.GopoolWorkerFactor, "gopool-worker-factor", o.GopoolWorkerFactor,

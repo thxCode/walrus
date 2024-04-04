@@ -5,6 +5,7 @@ import (
 
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
 // LoadRestConfigNonInteractive loads a rest config according to the following rules.
@@ -59,4 +60,41 @@ func LoadRestConfig(path string) (*rest.Config, error) {
 	}
 
 	return cc.ClientConfig()
+}
+
+// WrapRestConfigWithAuthInfo authenticates the given rest config with the given http request.
+func WrapRestConfigWithAuthInfo(restCfg rest.Config, authInfo clientcmdapi.AuthInfo) (*rest.Config, error) {
+	restCfg.TLSClientConfig = *restCfg.TLSClientConfig.DeepCopy()
+
+	switch {
+	case authInfo.Username != "" && authInfo.Password != "":
+		restCfg.Username = authInfo.Username
+		restCfg.Password = authInfo.Password
+		restCfg.BearerTokenFile = ""
+		restCfg.BearerToken = ""
+		restCfg.CertFile = ""
+		restCfg.CertData = nil
+		restCfg.KeyFile = ""
+		restCfg.KeyData = nil
+	case authInfo.Token != "":
+		restCfg.BearerToken = authInfo.Token
+		restCfg.BearerTokenFile = ""
+		restCfg.Username = ""
+		restCfg.Password = ""
+		restCfg.CertFile = ""
+		restCfg.CertData = nil
+		restCfg.KeyFile = ""
+		restCfg.KeyData = nil
+	}
+
+	if authInfo.Impersonate != "" {
+		restCfg.Impersonate = rest.ImpersonationConfig{
+			UserName: authInfo.Impersonate,
+			UID:      authInfo.ImpersonateUID,
+			Groups:   authInfo.ImpersonateGroups,
+			Extra:    authInfo.ImpersonateUserExtra,
+		}
+	}
+
+	return &restCfg, nil
 }

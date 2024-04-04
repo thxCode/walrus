@@ -28,6 +28,8 @@ var setupers = []extensionapi.Setup{
 	new(walrus.ResourceDefinitionHandler),
 	new(walrus.ResourceRunHandler),
 	new(walrus.SettingHandler),
+	new(walrus.SubjectHandler),
+	new(walrus.SubjectProviderHandler),
 	new(walrus.TemplateHandler),
 	new(walrus.VariableHandler),
 }

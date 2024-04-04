@@ -19,119 +19,147 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.Catalog":                      schema_pkg_apis_walrus_v1_Catalog(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.CatalogList":                  schema_pkg_apis_walrus_v1_CatalogList(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.Connector":                    schema_pkg_apis_walrus_v1_Connector(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ConnectorList":                schema_pkg_apis_walrus_v1_ConnectorList(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.Environment":                  schema_pkg_apis_walrus_v1_Environment(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.EnvironmentList":              schema_pkg_apis_walrus_v1_EnvironmentList(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.EnvironmentSpec":              schema_pkg_apis_walrus_v1_EnvironmentSpec(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.EnvironmentStatus":            schema_pkg_apis_walrus_v1_EnvironmentStatus(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.FileExample":                  schema_pkg_apis_walrus_v1_FileExample(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.FileExampleList":              schema_pkg_apis_walrus_v1_FileExampleList(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.FileExampleStatus":            schema_pkg_apis_walrus_v1_FileExampleStatus(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.Project":                      schema_pkg_apis_walrus_v1_Project(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ProjectList":                  schema_pkg_apis_walrus_v1_ProjectList(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ProjectSpec":                  schema_pkg_apis_walrus_v1_ProjectSpec(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ProjectStatus":                schema_pkg_apis_walrus_v1_ProjectStatus(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ProjectSubject":               schema_pkg_apis_walrus_v1_ProjectSubject(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ProjectSubjects":              schema_pkg_apis_walrus_v1_ProjectSubjects(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.Resource":                     schema_pkg_apis_walrus_v1_Resource(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ResourceComponent":            schema_pkg_apis_walrus_v1_ResourceComponent(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ResourceComponents":           schema_pkg_apis_walrus_v1_ResourceComponents(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ResourceDefinition":           schema_pkg_apis_walrus_v1_ResourceDefinition(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ResourceDefinitionList":       schema_pkg_apis_walrus_v1_ResourceDefinitionList(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ResourceList":                 schema_pkg_apis_walrus_v1_ResourceList(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ResourceRun":                  schema_pkg_apis_walrus_v1_ResourceRun(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ResourceRunList":              schema_pkg_apis_walrus_v1_ResourceRunList(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.Setting":                      schema_pkg_apis_walrus_v1_Setting(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SettingList":                  schema_pkg_apis_walrus_v1_SettingList(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SettingSpec":                  schema_pkg_apis_walrus_v1_SettingSpec(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SettingStatus":                schema_pkg_apis_walrus_v1_SettingStatus(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.Template":                     schema_pkg_apis_walrus_v1_Template(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.TemplateList":                 schema_pkg_apis_walrus_v1_TemplateList(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.Variable":                     schema_pkg_apis_walrus_v1_Variable(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.VariableList":                 schema_pkg_apis_walrus_v1_VariableList(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.VariableSpec":                 schema_pkg_apis_walrus_v1_VariableSpec(ref),
-		"github.com/seal-io/walrus/pkg/apis/walrus/v1.VariableStatus":               schema_pkg_apis_walrus_v1_VariableStatus(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.Catalog":                  schema_pkg_apis_walruscore_v1_Catalog(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.CatalogList":              schema_pkg_apis_walruscore_v1_CatalogList(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.CatalogSpec":              schema_pkg_apis_walruscore_v1_CatalogSpec(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.CatalogStatus":            schema_pkg_apis_walruscore_v1_CatalogStatus(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.Connector":                schema_pkg_apis_walruscore_v1_Connector(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ConnectorList":            schema_pkg_apis_walruscore_v1_ConnectorList(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ConnectorSpec":            schema_pkg_apis_walruscore_v1_ConnectorSpec(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ConnectorStatus":          schema_pkg_apis_walruscore_v1_ConnectorStatus(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.Resource":                 schema_pkg_apis_walruscore_v1_Resource(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceDefinition":       schema_pkg_apis_walruscore_v1_ResourceDefinition(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceDefinitionList":   schema_pkg_apis_walruscore_v1_ResourceDefinitionList(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceDefinitionSpec":   schema_pkg_apis_walruscore_v1_ResourceDefinitionSpec(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceDefinitionStatus": schema_pkg_apis_walruscore_v1_ResourceDefinitionStatus(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceList":             schema_pkg_apis_walruscore_v1_ResourceList(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceRun":              schema_pkg_apis_walruscore_v1_ResourceRun(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceRunList":          schema_pkg_apis_walruscore_v1_ResourceRunList(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceRunSpec":          schema_pkg_apis_walruscore_v1_ResourceRunSpec(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceRunStatus":        schema_pkg_apis_walruscore_v1_ResourceRunStatus(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceSpec":             schema_pkg_apis_walruscore_v1_ResourceSpec(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceStatus":           schema_pkg_apis_walruscore_v1_ResourceStatus(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.Template":                 schema_pkg_apis_walruscore_v1_Template(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.TemplateList":             schema_pkg_apis_walruscore_v1_TemplateList(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.TemplateSpec":             schema_pkg_apis_walruscore_v1_TemplateSpec(ref),
-		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.TemplateStatus":           schema_pkg_apis_walruscore_v1_TemplateStatus(ref),
-		"k8s.io/apimachinery/pkg/api/resource.Quantity":                             schema_apimachinery_pkg_api_resource_Quantity(ref),
-		"k8s.io/apimachinery/pkg/api/resource.int64Amount":                          schema_apimachinery_pkg_api_resource_int64Amount(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.APIGroup":                             schema_pkg_apis_meta_v1_APIGroup(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.APIGroupList":                         schema_pkg_apis_meta_v1_APIGroupList(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.APIResource":                          schema_pkg_apis_meta_v1_APIResource(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.APIResourceList":                      schema_pkg_apis_meta_v1_APIResourceList(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.APIVersions":                          schema_pkg_apis_meta_v1_APIVersions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.ApplyOptions":                         schema_pkg_apis_meta_v1_ApplyOptions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.Condition":                            schema_pkg_apis_meta_v1_Condition(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.CreateOptions":                        schema_pkg_apis_meta_v1_CreateOptions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.DeleteOptions":                        schema_pkg_apis_meta_v1_DeleteOptions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.Duration":                             schema_pkg_apis_meta_v1_Duration(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.FieldsV1":                             schema_pkg_apis_meta_v1_FieldsV1(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.GetOptions":                           schema_pkg_apis_meta_v1_GetOptions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupKind":                            schema_pkg_apis_meta_v1_GroupKind(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupResource":                        schema_pkg_apis_meta_v1_GroupResource(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersion":                         schema_pkg_apis_meta_v1_GroupVersion(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersionForDiscovery":             schema_pkg_apis_meta_v1_GroupVersionForDiscovery(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersionKind":                     schema_pkg_apis_meta_v1_GroupVersionKind(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersionResource":                 schema_pkg_apis_meta_v1_GroupVersionResource(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.InternalEvent":                        schema_pkg_apis_meta_v1_InternalEvent(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector":                        schema_pkg_apis_meta_v1_LabelSelector(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelectorRequirement":             schema_pkg_apis_meta_v1_LabelSelectorRequirement(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.List":                                 schema_pkg_apis_meta_v1_List(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta":                             schema_pkg_apis_meta_v1_ListMeta(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.ListOptions":                          schema_pkg_apis_meta_v1_ListOptions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.ManagedFieldsEntry":                   schema_pkg_apis_meta_v1_ManagedFieldsEntry(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime":                            schema_pkg_apis_meta_v1_MicroTime(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta":                           schema_pkg_apis_meta_v1_ObjectMeta(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference":                       schema_pkg_apis_meta_v1_OwnerReference(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.PartialObjectMetadata":                schema_pkg_apis_meta_v1_PartialObjectMetadata(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.PartialObjectMetadataList":            schema_pkg_apis_meta_v1_PartialObjectMetadataList(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.Patch":                                schema_pkg_apis_meta_v1_Patch(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.PatchOptions":                         schema_pkg_apis_meta_v1_PatchOptions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.Preconditions":                        schema_pkg_apis_meta_v1_Preconditions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.RootPaths":                            schema_pkg_apis_meta_v1_RootPaths(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.ServerAddressByClientCIDR":            schema_pkg_apis_meta_v1_ServerAddressByClientCIDR(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.Status":                               schema_pkg_apis_meta_v1_Status(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.StatusCause":                          schema_pkg_apis_meta_v1_StatusCause(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.StatusDetails":                        schema_pkg_apis_meta_v1_StatusDetails(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.Table":                                schema_pkg_apis_meta_v1_Table(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.TableColumnDefinition":                schema_pkg_apis_meta_v1_TableColumnDefinition(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.TableOptions":                         schema_pkg_apis_meta_v1_TableOptions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.TableRow":                             schema_pkg_apis_meta_v1_TableRow(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.TableRowCondition":                    schema_pkg_apis_meta_v1_TableRowCondition(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.Time":                                 schema_pkg_apis_meta_v1_Time(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.Timestamp":                            schema_pkg_apis_meta_v1_Timestamp(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.TypeMeta":                             schema_pkg_apis_meta_v1_TypeMeta(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.UpdateOptions":                        schema_pkg_apis_meta_v1_UpdateOptions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.WatchEvent":                           schema_pkg_apis_meta_v1_WatchEvent(ref),
-		"k8s.io/apimachinery/pkg/runtime.RawExtension":                              schema_k8sio_apimachinery_pkg_runtime_RawExtension(ref),
-		"k8s.io/apimachinery/pkg/runtime.TypeMeta":                                  schema_k8sio_apimachinery_pkg_runtime_TypeMeta(ref),
-		"k8s.io/apimachinery/pkg/runtime.Unknown":                                   schema_k8sio_apimachinery_pkg_runtime_Unknown(ref),
-		"k8s.io/apimachinery/pkg/version.Info":                                      schema_k8sio_apimachinery_pkg_version_Info(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.Catalog":                                   schema_pkg_apis_walrus_v1_Catalog(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.CatalogList":                               schema_pkg_apis_walrus_v1_CatalogList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.Connector":                                 schema_pkg_apis_walrus_v1_Connector(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ConnectorList":                             schema_pkg_apis_walrus_v1_ConnectorList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.Environment":                               schema_pkg_apis_walrus_v1_Environment(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.EnvironmentList":                           schema_pkg_apis_walrus_v1_EnvironmentList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.EnvironmentSpec":                           schema_pkg_apis_walrus_v1_EnvironmentSpec(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.EnvironmentStatus":                         schema_pkg_apis_walrus_v1_EnvironmentStatus(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.FileExample":                               schema_pkg_apis_walrus_v1_FileExample(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.FileExampleList":                           schema_pkg_apis_walrus_v1_FileExampleList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.FileExampleStatus":                         schema_pkg_apis_walrus_v1_FileExampleStatus(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.Project":                                   schema_pkg_apis_walrus_v1_Project(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ProjectList":                               schema_pkg_apis_walrus_v1_ProjectList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ProjectSpec":                               schema_pkg_apis_walrus_v1_ProjectSpec(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ProjectStatus":                             schema_pkg_apis_walrus_v1_ProjectStatus(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ProjectSubject":                            schema_pkg_apis_walrus_v1_ProjectSubject(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ProjectSubjects":                           schema_pkg_apis_walrus_v1_ProjectSubjects(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.Resource":                                  schema_pkg_apis_walrus_v1_Resource(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ResourceComponent":                         schema_pkg_apis_walrus_v1_ResourceComponent(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ResourceComponents":                        schema_pkg_apis_walrus_v1_ResourceComponents(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ResourceDefinition":                        schema_pkg_apis_walrus_v1_ResourceDefinition(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ResourceDefinitionList":                    schema_pkg_apis_walrus_v1_ResourceDefinitionList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ResourceList":                              schema_pkg_apis_walrus_v1_ResourceList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ResourceRun":                               schema_pkg_apis_walrus_v1_ResourceRun(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.ResourceRunList":                           schema_pkg_apis_walrus_v1_ResourceRunList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.Setting":                                   schema_pkg_apis_walrus_v1_Setting(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SettingList":                               schema_pkg_apis_walrus_v1_SettingList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SettingSpec":                               schema_pkg_apis_walrus_v1_SettingSpec(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SettingStatus":                             schema_pkg_apis_walrus_v1_SettingStatus(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.Subject":                                   schema_pkg_apis_walrus_v1_Subject(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectList":                               schema_pkg_apis_walrus_v1_SubjectList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectLogin":                              schema_pkg_apis_walrus_v1_SubjectLogin(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectLoginSpec":                          schema_pkg_apis_walrus_v1_SubjectLoginSpec(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectLoginStatus":                        schema_pkg_apis_walrus_v1_SubjectLoginStatus(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProvider":                           schema_pkg_apis_walrus_v1_SubjectProvider(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderBitbucketConfig":            schema_pkg_apis_walrus_v1_SubjectProviderBitbucketConfig(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderExternalConfig":             schema_pkg_apis_walrus_v1_SubjectProviderExternalConfig(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderGiteaConfig":                schema_pkg_apis_walrus_v1_SubjectProviderGiteaConfig(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderGithubConfig":               schema_pkg_apis_walrus_v1_SubjectProviderGithubConfig(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderGitlabConfig":               schema_pkg_apis_walrus_v1_SubjectProviderGitlabConfig(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderGoogleConfig":               schema_pkg_apis_walrus_v1_SubjectProviderGoogleConfig(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderLdapConfig":                 schema_pkg_apis_walrus_v1_SubjectProviderLdapConfig(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderLdapGroupSearch":            schema_pkg_apis_walrus_v1_SubjectProviderLdapGroupSearch(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderLdapGroupSearchUserMatcher": schema_pkg_apis_walrus_v1_SubjectProviderLdapGroupSearchUserMatcher(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderLdapUserSearch":             schema_pkg_apis_walrus_v1_SubjectProviderLdapUserSearch(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderList":                       schema_pkg_apis_walrus_v1_SubjectProviderList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderMicrosoftConfig":            schema_pkg_apis_walrus_v1_SubjectProviderMicrosoftConfig(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderOAuthClaimMapping":          schema_pkg_apis_walrus_v1_SubjectProviderOAuthClaimMapping(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderOAuthConfig":                schema_pkg_apis_walrus_v1_SubjectProviderOAuthConfig(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderOidcConfig":                 schema_pkg_apis_walrus_v1_SubjectProviderOidcConfig(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderSpec":                       schema_pkg_apis_walrus_v1_SubjectProviderSpec(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderStatus":                     schema_pkg_apis_walrus_v1_SubjectProviderStatus(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectRef":                                schema_pkg_apis_walrus_v1_SubjectRef(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectSpec":                               schema_pkg_apis_walrus_v1_SubjectSpec(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectToken":                              schema_pkg_apis_walrus_v1_SubjectToken(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectTokenSpec":                          schema_pkg_apis_walrus_v1_SubjectTokenSpec(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectTokenStatus":                        schema_pkg_apis_walrus_v1_SubjectTokenStatus(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.Template":                                  schema_pkg_apis_walrus_v1_Template(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.TemplateList":                              schema_pkg_apis_walrus_v1_TemplateList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.Variable":                                  schema_pkg_apis_walrus_v1_Variable(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.VariableList":                              schema_pkg_apis_walrus_v1_VariableList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.VariableSpec":                              schema_pkg_apis_walrus_v1_VariableSpec(ref),
+		"github.com/seal-io/walrus/pkg/apis/walrus/v1.VariableStatus":                            schema_pkg_apis_walrus_v1_VariableStatus(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.Catalog":                               schema_pkg_apis_walruscore_v1_Catalog(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.CatalogList":                           schema_pkg_apis_walruscore_v1_CatalogList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.CatalogSpec":                           schema_pkg_apis_walruscore_v1_CatalogSpec(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.CatalogStatus":                         schema_pkg_apis_walruscore_v1_CatalogStatus(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.Connector":                             schema_pkg_apis_walruscore_v1_Connector(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ConnectorList":                         schema_pkg_apis_walruscore_v1_ConnectorList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ConnectorSpec":                         schema_pkg_apis_walruscore_v1_ConnectorSpec(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ConnectorStatus":                       schema_pkg_apis_walruscore_v1_ConnectorStatus(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.Resource":                              schema_pkg_apis_walruscore_v1_Resource(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceDefinition":                    schema_pkg_apis_walruscore_v1_ResourceDefinition(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceDefinitionList":                schema_pkg_apis_walruscore_v1_ResourceDefinitionList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceDefinitionSpec":                schema_pkg_apis_walruscore_v1_ResourceDefinitionSpec(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceDefinitionStatus":              schema_pkg_apis_walruscore_v1_ResourceDefinitionStatus(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceList":                          schema_pkg_apis_walruscore_v1_ResourceList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceRun":                           schema_pkg_apis_walruscore_v1_ResourceRun(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceRunList":                       schema_pkg_apis_walruscore_v1_ResourceRunList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceRunSpec":                       schema_pkg_apis_walruscore_v1_ResourceRunSpec(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceRunStatus":                     schema_pkg_apis_walruscore_v1_ResourceRunStatus(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceSpec":                          schema_pkg_apis_walruscore_v1_ResourceSpec(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.ResourceStatus":                        schema_pkg_apis_walruscore_v1_ResourceStatus(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.Template":                              schema_pkg_apis_walruscore_v1_Template(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.TemplateList":                          schema_pkg_apis_walruscore_v1_TemplateList(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.TemplateSpec":                          schema_pkg_apis_walruscore_v1_TemplateSpec(ref),
+		"github.com/seal-io/walrus/pkg/apis/walruscore/v1.TemplateStatus":                        schema_pkg_apis_walruscore_v1_TemplateStatus(ref),
+		"k8s.io/apimachinery/pkg/api/resource.Quantity":                                          schema_apimachinery_pkg_api_resource_Quantity(ref),
+		"k8s.io/apimachinery/pkg/api/resource.int64Amount":                                       schema_apimachinery_pkg_api_resource_int64Amount(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.APIGroup":                                          schema_pkg_apis_meta_v1_APIGroup(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.APIGroupList":                                      schema_pkg_apis_meta_v1_APIGroupList(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.APIResource":                                       schema_pkg_apis_meta_v1_APIResource(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.APIResourceList":                                   schema_pkg_apis_meta_v1_APIResourceList(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.APIVersions":                                       schema_pkg_apis_meta_v1_APIVersions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.ApplyOptions":                                      schema_pkg_apis_meta_v1_ApplyOptions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.Condition":                                         schema_pkg_apis_meta_v1_Condition(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.CreateOptions":                                     schema_pkg_apis_meta_v1_CreateOptions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.DeleteOptions":                                     schema_pkg_apis_meta_v1_DeleteOptions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.Duration":                                          schema_pkg_apis_meta_v1_Duration(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.FieldsV1":                                          schema_pkg_apis_meta_v1_FieldsV1(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.GetOptions":                                        schema_pkg_apis_meta_v1_GetOptions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupKind":                                         schema_pkg_apis_meta_v1_GroupKind(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupResource":                                     schema_pkg_apis_meta_v1_GroupResource(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersion":                                      schema_pkg_apis_meta_v1_GroupVersion(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersionForDiscovery":                          schema_pkg_apis_meta_v1_GroupVersionForDiscovery(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersionKind":                                  schema_pkg_apis_meta_v1_GroupVersionKind(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersionResource":                              schema_pkg_apis_meta_v1_GroupVersionResource(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.InternalEvent":                                     schema_pkg_apis_meta_v1_InternalEvent(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector":                                     schema_pkg_apis_meta_v1_LabelSelector(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelectorRequirement":                          schema_pkg_apis_meta_v1_LabelSelectorRequirement(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.List":                                              schema_pkg_apis_meta_v1_List(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta":                                          schema_pkg_apis_meta_v1_ListMeta(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.ListOptions":                                       schema_pkg_apis_meta_v1_ListOptions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.ManagedFieldsEntry":                                schema_pkg_apis_meta_v1_ManagedFieldsEntry(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime":                                         schema_pkg_apis_meta_v1_MicroTime(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta":                                        schema_pkg_apis_meta_v1_ObjectMeta(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference":                                    schema_pkg_apis_meta_v1_OwnerReference(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.PartialObjectMetadata":                             schema_pkg_apis_meta_v1_PartialObjectMetadata(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.PartialObjectMetadataList":                         schema_pkg_apis_meta_v1_PartialObjectMetadataList(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.Patch":                                             schema_pkg_apis_meta_v1_Patch(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.PatchOptions":                                      schema_pkg_apis_meta_v1_PatchOptions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.Preconditions":                                     schema_pkg_apis_meta_v1_Preconditions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.RootPaths":                                         schema_pkg_apis_meta_v1_RootPaths(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.ServerAddressByClientCIDR":                         schema_pkg_apis_meta_v1_ServerAddressByClientCIDR(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.Status":                                            schema_pkg_apis_meta_v1_Status(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.StatusCause":                                       schema_pkg_apis_meta_v1_StatusCause(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.StatusDetails":                                     schema_pkg_apis_meta_v1_StatusDetails(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.Table":                                             schema_pkg_apis_meta_v1_Table(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.TableColumnDefinition":                             schema_pkg_apis_meta_v1_TableColumnDefinition(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.TableOptions":                                      schema_pkg_apis_meta_v1_TableOptions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.TableRow":                                          schema_pkg_apis_meta_v1_TableRow(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.TableRowCondition":                                 schema_pkg_apis_meta_v1_TableRowCondition(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.Time":                                              schema_pkg_apis_meta_v1_Time(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.Timestamp":                                         schema_pkg_apis_meta_v1_Timestamp(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.TypeMeta":                                          schema_pkg_apis_meta_v1_TypeMeta(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.UpdateOptions":                                     schema_pkg_apis_meta_v1_UpdateOptions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.WatchEvent":                                        schema_pkg_apis_meta_v1_WatchEvent(ref),
+		"k8s.io/apimachinery/pkg/runtime.RawExtension":                                           schema_k8sio_apimachinery_pkg_runtime_RawExtension(ref),
+		"k8s.io/apimachinery/pkg/runtime.TypeMeta":                                               schema_k8sio_apimachinery_pkg_runtime_TypeMeta(ref),
+		"k8s.io/apimachinery/pkg/runtime.Unknown":                                                schema_k8sio_apimachinery_pkg_runtime_Unknown(ref),
+		"k8s.io/apimachinery/pkg/version.Info":                                                   schema_k8sio_apimachinery_pkg_version_Info(ref),
 	}
 }
 
@@ -766,32 +794,31 @@ func schema_pkg_apis_walrus_v1_ProjectSubject(ref common.ReferenceCallback) comm
 				Description: "ProjectSubject is the schema for the project subject API.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"name": {
+					"namespace": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Name is the name of the subject.",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
-					"kind": {
+					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Kind is the kind of the subject.",
-							Type:        []string{"string"},
-							Format:      "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"role": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Role is the role of the subject.\n\n\nPossible enum values:\n - `\"walrus-project-member\"` is the subject role for project member.\n - `\"walrus-project-owner\"` is the subject role for project owner.\n - `\"walrus-project-viewer\"` is the subject role for project viewer.",
+							Description: "Role is the project role of the subject.\n\n\nPossible enum values:\n - `\"member\"` is the role for project member.\n - `\"owner\"` is the role for project owner.\n - `\"viewer\"` is the role for project viewer.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
-							Enum:        []interface{}{"walrus-project-member", "walrus-project-owner", "walrus-project-viewer"},
+							Enum:        []interface{}{"member", "owner", "viewer"},
 						},
 					},
 				},
-				Required: []string{"name", "role"},
+				Required: []string{"namespace", "name", "role"},
 			},
 		},
 	}
@@ -801,7 +828,7 @@ func schema_pkg_apis_walrus_v1_ProjectSubjects(ref common.ReferenceCallback) com
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "ProjectSubjects holds the list of ProjectSubject.\n\nProjectSubjects is the subresource of Project.",
+				Description: "ProjectSubjects holds the list of ProjectSubject.\n\nProjectSubjects is the subresource of Project to manage the subjects.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"kind": {
@@ -1389,6 +1416,1266 @@ func schema_pkg_apis_walrus_v1_SettingStatus(ref common.ReferenceCallback) commo
 				Required: []string{"hidden", "editable", "sensitive", "value"},
 			},
 		},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_Subject(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Subject is the schema for the subjects API.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectSpec"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectSpec", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectList holds the list of Subject.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.Subject"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"items"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/seal-io/walrus/pkg/apis/walrus/v1.Subject", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectLogin(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectLogin is the subresource of the Subject resource for login request.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectLoginSpec"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectLoginStatus"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectLoginSpec", "github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectLoginStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectLoginSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectLoginSpec defines the desired state of SubjectLogin.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"credential": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Credential is the credential of the subject, it is provided as a write-only input field.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"credential"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectLoginStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectLoginStatus defines the observed state of SubjectLogin.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"token": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Token is the token of the SubjectLogin.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"token"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProvider(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProvider is the schema for the subject providers API.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderSpec"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderStatus"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderSpec", "github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProviderBitbucketConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProviderBitbucketConfig defines the configuration of the Bitbucket.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"clientID": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientID is the client ID of the Bitbucket client.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"clientSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientSecret is the client secret of the Bitbucket client.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"groups": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Groups are used to filter out which groups should be matched.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"clientID", "clientSecret"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProviderExternalConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProviderExternalConfig defines the configuration of the subject provider.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"ldap": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Ldap is the configuration of the LDAP.",
+							Ref:         ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderLdapConfig"),
+						},
+					},
+					"oauth": {
+						SchemaProps: spec.SchemaProps{
+							Description: "OAuth is the configuration of the OAuth 2.0.",
+							Ref:         ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderOAuthConfig"),
+						},
+					},
+					"oidc": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Oidc is the configuration of the OpenID Connect.",
+							Ref:         ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderOidcConfig"),
+						},
+					},
+					"github": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Github is the configuration of the Github.",
+							Ref:         ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderGithubConfig"),
+						},
+					},
+					"gitlab": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Gitlab is the configuration of the Gitlab.",
+							Ref:         ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderGitlabConfig"),
+						},
+					},
+					"bitbucket": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Bitbucket is the configuration of the Bitbucket.",
+							Ref:         ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderBitbucketConfig"),
+						},
+					},
+					"gitea": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Gitea is the configuration of the Gitea.",
+							Ref:         ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderGiteaConfig"),
+						},
+					},
+					"google": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Google is the configuration of the Google.",
+							Ref:         ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderGoogleConfig"),
+						},
+					},
+					"microsoft": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Microsoft is the configuration of the Microsoft.",
+							Ref:         ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderMicrosoftConfig"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderBitbucketConfig", "github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderGiteaConfig", "github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderGithubConfig", "github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderGitlabConfig", "github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderGoogleConfig", "github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderLdapConfig", "github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderMicrosoftConfig", "github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderOAuthConfig", "github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderOidcConfig"},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProviderGiteaConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProviderGiteaConfig defines the configuration of the Gitea.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"clientID": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientID is the client ID of the Gitea client.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"clientSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientSecret is the client secret of the Gitea client.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"groups": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Groups is used to filter out which groups should be matched.\n\nEach item is in the form of \"organization:team\".",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"clientID", "clientSecret"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProviderGithubConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProviderGithubConfig defines the configuration of the Github.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"clientID": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientID is the client ID of the Github client.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"clientSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientSecret is the client secret of the Github client.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"groups": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Groups are used to filter out which groups should be matched.\n\nEach item is in the form of \"organization:team\".",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"clientID", "clientSecret"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProviderGitlabConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProviderGitlabConfig defines the configuration of the Gitlab.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"clientID": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientID is the client ID of the Gitlab client.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"clientSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientSecret is the client secret of the Gitlab client.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"groups": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Groups are used to filter out which groups should be matched.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"clientID", "clientSecret"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProviderGoogleConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProviderGoogleConfig defines the configuration of the Google.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"clientID": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientID is the client ID of the Google client.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"clientSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientSecret is the client secret of the Google client.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"groups": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Groups are used to filter out which groups should be matched.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"clientID", "clientSecret"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProviderLdapConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProviderLdapConfig defines the configuration of the LDAP.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"host": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Host is the host of the LDAP server, which in form of \"hostname:port\".\n\nIf the port is not specified, the default port 636 will be used.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"skipInsecureVerify": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SkipInsecureVerify is the flag to skip the insecure verify.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"serviceAccountDN": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ServiceAccountDN is the distinguished name of the service account of the LDAP server. It is used to search other users.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"serviceAccountPassword": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ServiceAccountPassword is the password of the service account of the LDAP server.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"groupSearch": {
+						SchemaProps: spec.SchemaProps{
+							Description: "GroupSearch is the group search configuration of the LDAP.\n\nIt maps a group to a list of users.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderLdapGroupSearch"),
+						},
+					},
+					"userSearch": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UserSearch is the user search configuration of the LDAP.\n\nIt maps a username and password entered by a user to the LDAP entry.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderLdapUserSearch"),
+						},
+					},
+				},
+				Required: []string{"host", "serviceAccountDN", "serviceAccountPassword", "groupSearch", "userSearch"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderLdapGroupSearch", "github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderLdapUserSearch"},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProviderLdapGroupSearch(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProviderLdapGroupSearch defines the group search configuration of the LDAP.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"baseDN": {
+						SchemaProps: spec.SchemaProps{
+							Description: "BaseDN to start the search from.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"filter": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Filter to apply to the search.",
+							Default:     "(objectClass=group)",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"userMatchers": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UserMatchers is the user matcher list for the LDAP group search.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderLdapGroupSearchUserMatcher"),
+									},
+								},
+							},
+						},
+					},
+					"nameAttribute": {
+						SchemaProps: spec.SchemaProps{
+							Description: "NameAttribute is the attribute to use as the group name.",
+							Default:     "name",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"baseDN"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderLdapGroupSearchUserMatcher"},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProviderLdapGroupSearchUserMatcher(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProviderLdapGroupSearchUserMatcher defines the user matcher of the LDAP group search.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"groupAttribute": {
+						SchemaProps: spec.SchemaProps{
+							Description: "GroupAttribute is the attribute of the group.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"userAttribute": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UserAttribute is the attribute of the user.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"groupAttribute", "userAttribute"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProviderLdapUserSearch(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProviderLdapUserSearch defines the user search configuration of the LDAP.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"baseDN": {
+						SchemaProps: spec.SchemaProps{
+							Description: "BaseDN to start the search from.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"filter": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Filter to apply to the search.",
+							Default:     "(objectClass=person)",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"nameAttribute": {
+						SchemaProps: spec.SchemaProps{
+							Description: "NameAttribute is the attribute to use as the username.",
+							Default:     "uid",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"displayNameAttribute": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DisplayNameAttribute is the attribute to use as the display name.",
+							Default:     "cn",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"emailAttribute": {
+						SchemaProps: spec.SchemaProps{
+							Description: "EmailAttribute is the attribute to use as the email.",
+							Default:     "mail",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"baseDN"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProviderList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProviderList holds the list of SubjectProvider.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProvider"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"items"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProvider", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProviderMicrosoftConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProviderMicrosoftConfig defines the configuration of the Microsoft.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"clientID": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientID is the client ID of the Microsoft client.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"clientSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientSecret is the client secret of the Microsoft client.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"tenant": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Tenant is the tenant of the Microsoft client.\n\nThe tenant is the directory that the user is in.\n\n\nPossible enum values:\n - `\"common\"` means the tenant is common.\n - `\"consumers\"` means the tenant is consumers.\n - `\"organizations\"` means the tenant is organizations.",
+							Default:     "common",
+							Type:        []string{"string"},
+							Format:      "",
+							Enum:        []interface{}{"common", "consumers", "organizations"},
+						},
+					},
+					"groups": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Groups are used to filter out which groups should be matched.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"clientID", "clientSecret"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProviderOAuthClaimMapping(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProviderOAuthClaimMapping defines the claim mapping of the OAuth.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"nameKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "NameKey is the key to pick \"name\" from claim.",
+							Default:     "preferred_username",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"displayNameKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DisplayNameKey is the key to pick \"displayName\" from claim.",
+							Default:     "name",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"emailKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "EmailKey is the key to pick \"email\" from claim.",
+							Default:     "email",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"groupsKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "GroupsKey is the key to pick \"groups\" from claim.",
+							Default:     "groups",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProviderOAuthConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProviderOAuthConfig defines the configuration of the OAuth 2.0.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"authorizationEndpoint": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AuthorizationEndpoint is the endpoint to authorize.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"tokenEndpoint": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TokenEndpoint is the endpoint to get OAuth token.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"userinfoEndpoint": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UserinfoEndpoint is the endpoint to get the user info.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"skipInsecureVerify": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SkipInsecureVerify is the flag to skip the insecure verify.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"clientID": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientID is the ID of the OAuth client.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"clientSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientSecret is the secret of the OAuth client.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"claimMapping": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClaimMapping is the claim mapping of the OpenID Connect.",
+							Ref:         ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderOAuthClaimMapping"),
+						},
+					},
+				},
+				Required: []string{"authorizationEndpoint", "tokenEndpoint", "userinfoEndpoint", "clientID", "clientSecret"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderOAuthClaimMapping"},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProviderOidcConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProviderOidcConfig defines the configuration of the OpenID Connect.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"issuer": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Issuer is the URL of the OpenID Connect issuer.\n\nThis field is only used when the provider is set to \"custom\".\n\nCanonical URL of the provider, also used for configuration discovery. This value MUST match the value returned in the provider config discovery.\n\nSee: https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"skipInsecureVerify": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SkipInsecureVerify is the flag to skip the insecure verify.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"clientID": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientID is the client ID of the OpenID Connect client.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"clientSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientSecret is the client secret of the OpenID Connect client.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"claimMapping": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClaimMapping is the claim mapping of the OpenID Connect.",
+							Ref:         ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderOAuthClaimMapping"),
+						},
+					},
+				},
+				Required: []string{"issuer", "clientID", "clientSecret"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderOAuthClaimMapping"},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProviderSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProviderSpec defines the desired state of SubjectProvider.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Type is the type of the subject provider, which is immutable.\n\n\nPossible enum values:\n - `\"bitbucket\"` means the subject provider is based on Bitbucket. This type is an external subject provider type, which is able to use Bitbucket as an authentication source.\n - `\"gitea\"` means the subject provider is based on Gitea. This type is an external subject provider type, which is able to use Gitea as an authentication source.\n - `\"github\"` means the subject provider is based on Github. This type is an external subject provider type, which is able to use Github as an authentication source.\n - `\"gitlab\"` means the subject provider is based on Gitlab. This type is an external subject provider type, which is able to use Gitlab as an authentication source.\n - `\"google\"` means the subject provider is based on Google. This type is an external subject provider type, which is able to use Google as an authentication source.\n - `\"internal\"` means the subject provider is builtin. It is only support using username/password to authenticate.\n - `\"ldap\"` means the subject provider is based on LDAP. This type is an external subject provider type, which is able to use standards-compliant LDAP as an authentication source.\n - `\"microsoft\"` means the subject provider is based on Microsoft. This type is an external subject provider type, which is able to use Microsoft as an authentication source.\n - `\"oauth\"` means the subject provider is based on OAuth 2.0. This type is an external subject provider type, which is able to use standards-compliant OAuth 2.0 provider as an authentication source.\n - `\"oidc\"` means the subject provider is based on OpenID Connect. This type is an external subject provider type, which is able to use standards-compliant OpenID Connect as an authentication source.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+							Enum:        []interface{}{"bitbucket", "gitea", "github", "gitlab", "google", "internal", "ldap", "microsoft", "oauth", "oidc"},
+						},
+					},
+					"displayName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DisplayName is the display name of the subject provider.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"description": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Description is the description of the subject provider.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"externalConfig": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ExternalConfig is the configuration of the external subject provider.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderExternalConfig"),
+						},
+					},
+				},
+				Required: []string{"type"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectProviderExternalConfig"},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectProviderStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectProviderStatus defines the observed state of SubjectProvider.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"loginWithPassword": {
+						SchemaProps: spec.SchemaProps{
+							Description: "LoginWithPassword is the flag to indicate whether the provider supports login with password.",
+							Default:     false,
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"loginWithPassword"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectRef(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectRef is the reference of the subject.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+				},
+				Required: []string{"namespace", "name"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectSpec defines the desired state of Subject.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"provider": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Provider is the name of subject provider who provides this subject, which is immutable.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"role": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Role is the role of the subject.\n\n\nPossible enum values:\n - `\"admin\"` is the subject role for subject admin.\n - `\"manager\"` is the subject role for subject manager.\n - `\"viewer\"` is the subject role for subject viewer.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+							Enum:        []interface{}{"admin", "manager", "viewer"},
+						},
+					},
+					"displayName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DisplayName is the display name of the subject.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"description": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Description is the description of the subject.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"email": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Email is the email of the subject.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"groups": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Groups is the groups that the subject belongs to.",
+							UniqueItems: true,
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"credential": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Credential is the credential of the subject, it is provided as a write-only input field.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"provider", "role", "email"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectToken(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectToken is the subresource of the Subject resource for token request.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectTokenSpec"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectTokenStatus"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectTokenSpec", "github.com/seal-io/walrus/pkg/apis/walrus/v1.SubjectTokenStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectTokenSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectTokenSpec defines the desired state of SubjectToken.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"expirationSeconds": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ExpirationSeconds is the requested duration of validity of the request. The token issuer may return a token with a different validity duration so a client needs to check the 'expiration' field in a response.",
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_walrus_v1_SubjectTokenStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubjectTokenStatus defines the observed state of SubjectToken.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"token": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Token is the token of the SubjectToken.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"expirationTimestamp": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ExpirationTimestamp is the time of expiration of the returned token.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+						},
+					},
+				},
+				Required: []string{"token", "expirationTimestamp"},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 
