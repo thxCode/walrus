@@ -46,6 +46,8 @@ func Route(r *mux.Route) {
 		HandlerFunc(profile)
 	sr.Path("/token").Methods(http.MethodGet).
 		HandlerFunc(token)
+	sr.Path("/rules/{namespace}").Methods(http.MethodGet).
+		HandlerFunc(rules)
 	sr.Path("/logout").Methods(http.MethodGet).
 		HandlerFunc(logout)
 }
@@ -350,10 +352,6 @@ type (
 		Email       *string `json:"email,omitempty"`
 		Password    *string `json:"password,omitempty"`
 	}
-	responseProfile struct {
-		Subject walrus.SubjectSpec                     `json:"subject"`
-		Review  authorization.SubjectRulesReviewStatus `json:"review"`
-	}
 )
 
 // profile is a handler to get/update profile.
@@ -390,19 +388,7 @@ func profile(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Get rules.
-		subjRules, err := cli.AuthorizationV1().SelfSubjectRulesReviews().
-			Create(r.Context(), new(authorization.SelfSubjectRulesReview), meta.CreateOptions{})
-		if err != nil {
-			responseError(w, fmt.Errorf("get access list: %w", err))
-			return
-		}
-
-		resp := responseProfile{
-			Subject: subj.Spec,
-			Review:  subjRules.Status,
-		}
-
+		resp := subj.Spec
 		httpx.JSON(w, http.StatusOK, resp)
 	}
 
@@ -411,25 +397,28 @@ func profile(w http.ResponseWriter, r *http.Request) {
 	_ = httpx.BindJSON(r, &req)
 
 	// Update profile.
-	eSubj := &walrus.Subject{
+	subj := &walrus.Subject{
 		ObjectMeta: meta.ObjectMeta{
 			Namespace: subjNamespace,
 			Name:      subjName,
 		},
 	}
 	if req.DisplayName != nil {
-		eSubj.Spec.DisplayName = *req.DisplayName
+		subj.Spec.DisplayName = *req.DisplayName
 	}
 	if req.Email != nil {
-		eSubj.Spec.Email = *req.Email
+		subj.Spec.Email = *req.Email
 	}
 	if req.Password != nil {
-		eSubj.Spec.Credential = req.Password
+		subj.Spec.Credential = req.Password
 	}
-	_, err = kubeclientset.Apply(r.Context(), cli.WalrusV1().Subjects(subjNamespace), eSubj)
+	subj, err = kubeclientset.Apply(r.Context(), cli.WalrusV1().Subjects(subjNamespace), subj)
 	if err != nil {
 		responseError(w, fmt.Errorf("update profile: %w", err))
 	}
+
+	resp := subj.Spec
+	httpx.JSON(w, http.StatusOK, resp)
 }
 
 type (
@@ -480,7 +469,62 @@ func token(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httpx.JSON(w, http.StatusOK, subjToken.Status)
+	resp := subjToken.Status
+	httpx.JSON(w, http.StatusOK, resp)
+}
+
+type (
+	requestRules struct {
+		Namespace string `path:"namespace"`
+	}
+	responseRules = []authorization.ResourceRule
+)
+
+// rules is a handler to get rules.
+//
+// GET: /rules/{namespace}
+func rules(w http.ResponseWriter, r *http.Request) {
+	// Get session.
+	rt, t := fetchSession(r)
+	if t == nil {
+		responseErrorWithCode(w, http.StatusUnauthorized, errors.New("unauthorized: no token"))
+		return
+	}
+
+	// Get kube client.
+	cli, err := getSubjectKubeClient(rt)
+	if err != nil {
+		responseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get kube client: %w", err))
+		return
+	}
+
+	// Parse request.
+	var req requestRules
+	_ = httpx.BindJSON(r, &req)
+
+	// Get rules.
+	rev := &authorization.SelfSubjectRulesReview{
+		Spec: authorization.SelfSubjectRulesReviewSpec{
+			Namespace: req.Namespace,
+		},
+	}
+	rev, err = cli.AuthorizationV1().SelfSubjectRulesReviews().
+		Create(r.Context(), rev, meta.CreateOptions{})
+	if err != nil {
+		responseError(w, fmt.Errorf("create self subject rules reviews: %w", err))
+		return
+	}
+
+	resp := make(responseRules, 0, len(rev.Status.ResourceRules))
+	for i := range rev.Status.ResourceRules {
+		for j := range rev.Status.ResourceRules[i].APIGroups {
+			if rev.Status.ResourceRules[i].APIGroups[j] != walrus.GroupName {
+				continue
+			}
+			resp = append(resp, rev.Status.ResourceRules[i])
+		}
+	}
+	httpx.JSON(w, http.StatusOK, resp)
 }
 
 // logout is a handler to log out.
@@ -677,6 +721,10 @@ func loginSubject(w http.ResponseWriter, r *http.Request, subj *walrus.Subject) 
 
 func responseErrorWithCode(w http.ResponseWriter, code int, err error) {
 	s := meta.Status{
+		TypeMeta: meta.TypeMeta{
+			APIVersion: "meta.k8s.io/v1",
+			Kind:       "Status",
+		},
 		Status: meta.StatusFailure,
 		Reason: meta.StatusReason(stringx.TrimAllSpace(http.StatusText(code))),
 		Code:   int32(code),
@@ -704,6 +752,10 @@ func responseError(w http.ResponseWriter, err error) {
 
 func renderErrorWithCode(w http.ResponseWriter, code int, err error) {
 	s := meta.Status{
+		TypeMeta: meta.TypeMeta{
+			APIVersion: "meta.k8s.io/v1",
+			Kind:       "Status",
+		},
 		Status: meta.StatusFailure,
 		Reason: meta.StatusReason(stringx.TrimAllSpace(http.StatusText(code))),
 		Code:   int32(code),
