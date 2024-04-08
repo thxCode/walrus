@@ -126,7 +126,6 @@ func decorateLoginPath(spec *openspec3.Paths, prefix string) {
                 "name": "provider",
                 "in": "query",
                 "description": "Provider is the name of subject provider who provides this subject.",
-                "required": true,
                 "schema": {
                     "type": "string"
                 }

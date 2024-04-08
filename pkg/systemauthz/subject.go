@@ -82,7 +82,10 @@ func ConvertSubjectNamesFromAuthnUser(user authnuser.Info) (subjNamespace, subjN
 // it returns empty strings.
 func ConvertSubjectNamesFromJwtToken(token jwt.Token) (subjNamespace, subjName string, ok bool) {
 	subjNamespace, subjName, ok = strings.Cut(strings.TrimPrefix(token.Subject(), "system:serviceaccount:"), ":")
-	if ok && subjNamespace != "" && subjName != "" {
+	if ok {
+		subjName = ConvertSubjectNameFromServiceAccountName(subjName)
+	}
+	if subjNamespace != "" && subjName != "" {
 		return subjNamespace, subjName, true
 	}
 	return "", "", false

@@ -387,6 +387,7 @@ func profile(w http.ResponseWriter, r *http.Request) {
 
 		resp := subj.Spec
 		httpx.JSON(w, http.StatusOK, resp)
+		return
 	}
 
 	// Parse request.
@@ -412,6 +413,7 @@ func profile(w http.ResponseWriter, r *http.Request) {
 	subj, err = kubeclientset.Apply(r.Context(), cli.WalrusV1().Subjects(subjNamespace), subj)
 	if err != nil {
 		ui.ResponseError(w, fmt.Errorf("update profile: %w", err))
+		return
 	}
 
 	resp := subj.Spec
@@ -649,6 +651,8 @@ func loginSubject(w http.ResponseWriter, r *http.Request, subj *walrus.Subject, 
 	assignSession(w, subjl.Status.Token)
 	if redirect {
 		http.Redirect(w, r, "/", http.StatusFound)
+	} else {
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
