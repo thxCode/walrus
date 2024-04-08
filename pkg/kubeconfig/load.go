@@ -63,7 +63,7 @@ func LoadRestConfig(path string) (*rest.Config, error) {
 }
 
 // WrapRestConfigWithAuthInfo authenticates the given rest config with the given http request.
-func WrapRestConfigWithAuthInfo(restCfg rest.Config, authInfo clientcmdapi.AuthInfo) (*rest.Config, error) {
+func WrapRestConfigWithAuthInfo(restCfg rest.Config, authInfo clientcmdapi.AuthInfo) *rest.Config {
 	restCfg.TLSClientConfig = *restCfg.TLSClientConfig.DeepCopy()
 
 	switch {
@@ -96,5 +96,5 @@ func WrapRestConfigWithAuthInfo(restCfg rest.Config, authInfo clientcmdapi.AuthI
 		}
 	}
 
-	return &restCfg, nil
+	return &restCfg
 }

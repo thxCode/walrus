@@ -205,8 +205,8 @@ func GrantProjectSubjectRoleFor(ctx context.Context, cli ctrlcli.Client, proj *w
 	}
 
 	// Convert.
-	subjNamespace, subjName := ConvertSubjectNamesFromAuthnUser(user)
-	if subjNamespace == "" || subjName == "" {
+	subjNamespace, subjName, ok := ConvertSubjectNamesFromAuthnUser(user)
+	if !ok {
 		return errors.New("incomplete user")
 	}
 

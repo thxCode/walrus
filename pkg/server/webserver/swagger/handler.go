@@ -55,7 +55,7 @@ const indexPage = `
 		<script>
 		  window.onload = () => {
 		    window.ui = SwaggerUIBundle({
-		      url: '/openapi/v3/apis/walrus.seal.io/v1',
+		      url: '/openapi',
 		      validatorUrl: 'none',
 		      dom_id: '#swagger-ui',
 		      deepLinking: true,

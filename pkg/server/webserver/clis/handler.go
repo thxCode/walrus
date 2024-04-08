@@ -10,12 +10,14 @@ import (
 	"github.com/seal-io/utils/httpx"
 	"github.com/seal-io/utils/osx"
 
+	"github.com/seal-io/walrus/pkg/server/webserver/openapi"
 	"github.com/seal-io/walrus/pkg/system"
 )
 
-func Route(r *mux.Route) {
+func Route(r *mux.Route) openapi.Decorator {
 	p, _ := r.GetPathTemplate()
 	r.Handler(http.StripPrefix(p, index()))
+	return getOpenapiDecorate(p)
 }
 
 func index() http.Handler {

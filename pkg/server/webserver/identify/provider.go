@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"sort"
+	"strings"
+	"unicode"
 
 	dexconnector "github.com/dexidp/dex/connector"
 	"github.com/dexidp/dex/connector/bitbucketcloud"
@@ -18,11 +21,16 @@ import (
 	"github.com/dexidp/dex/connector/oauth"
 	"github.com/dexidp/dex/connector/oidc"
 	dexserver "github.com/dexidp/dex/server"
+	"github.com/seal-io/utils/stringx"
 	"github.com/sirupsen/logrus"
+	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
 	"k8s.io/utils/ptr"
 
 	walrus "github.com/seal-io/walrus/pkg/apis/walrus/v1"
+	"github.com/seal-io/walrus/pkg/kubeclientset"
+	"github.com/seal-io/walrus/pkg/system"
+	"github.com/seal-io/walrus/pkg/systemkuberes"
 )
 
 type (
@@ -39,15 +47,16 @@ type (
 	}
 )
 
-type _ExternalPasswordProvider struct {
+type _ExternalPasswordConnector struct {
 	ConnConfig ExternalConnectorConfig
 }
 
-func NewExternalPasswordProvider(connConfig ExternalConnectorConfig) ExternalPasswordConnector {
-	return &_ExternalPasswordProvider{ConnConfig: connConfig}
+// NewExternalPasswordConnector creates a new ExternalPasswordConnector.
+func NewExternalPasswordConnector(connConfig ExternalConnectorConfig) ExternalPasswordConnector {
+	return &_ExternalPasswordConnector{ConnConfig: connConfig}
 }
 
-func (p *_ExternalPasswordProvider) openConnector() (dexconnector.PasswordConnector, error) {
+func (p *_ExternalPasswordConnector) openConnector() (dexconnector.PasswordConnector, error) {
 	lg := logrus.New()
 	lg.SetOutput(klog.Background().WithName("identify"))
 	conn, err := p.ConnConfig.Open("", lg)
@@ -57,7 +66,7 @@ func (p *_ExternalPasswordProvider) openConnector() (dexconnector.PasswordConnec
 	return conn.(dexconnector.PasswordConnector), nil
 }
 
-func (p *_ExternalPasswordProvider) Login(ctx context.Context, username, password string) (*ExternalIdentity, bool, error) {
+func (p *_ExternalPasswordConnector) Login(ctx context.Context, username, password string) (*ExternalIdentity, bool, error) {
 	conn, err := p.openConnector()
 	if err != nil {
 		return nil, false, fmt.Errorf("open connector: %w", err)
@@ -69,21 +78,22 @@ func (p *_ExternalPasswordProvider) Login(ctx context.Context, username, passwor
 	return &id, ok, nil
 }
 
-type _ExternalCallbackProvider[T ExternalConnectorConfig] struct {
+type _ExternalCallbackConnector[T ExternalConnectorConfig] struct {
 	ConnConfig        T
 	ClientID          string
 	InjectCallbackUrl func(callbackUrl string, ConnConfig T)
 }
 
-func NewExternalCallbackProvider[T ExternalConnectorConfig](connConfig T, clientID string, injectCallbackUrl func(string, T)) ExternalCallbackConnector { // nolint:lll
-	return &_ExternalCallbackProvider[T]{
+// NewExternalCallbackConnector creates a new ExternalCallbackConnector.
+func NewExternalCallbackConnector[T ExternalConnectorConfig](connConfig T, clientID string, injectCallbackUrl func(string, T)) ExternalCallbackConnector { // nolint:lll
+	return &_ExternalCallbackConnector[T]{
 		ConnConfig:        connConfig,
 		ClientID:          clientID,
 		InjectCallbackUrl: injectCallbackUrl,
 	}
 }
 
-func (p *_ExternalCallbackProvider[T]) openConnector() (dexconnector.CallbackConnector, error) {
+func (p *_ExternalCallbackConnector[T]) openConnector() (dexconnector.CallbackConnector, error) {
 	lg := logrus.New()
 	lg.SetOutput(klog.Background().WithName("identify"))
 	conn, err := p.ConnConfig.Open("", lg)
@@ -93,7 +103,7 @@ func (p *_ExternalCallbackProvider[T]) openConnector() (dexconnector.CallbackCon
 	return conn.(dexconnector.CallbackConnector), nil
 }
 
-func (p *_ExternalCallbackProvider[T]) GetLoginURL(callbackUrl, state string) (string, error) {
+func (p *_ExternalCallbackConnector[T]) GetLoginURL(callbackUrl, state string) (string, error) {
 	if p.InjectCallbackUrl != nil {
 		p.InjectCallbackUrl(callbackUrl, p.ConnConfig)
 	}
@@ -109,11 +119,11 @@ func (p *_ExternalCallbackProvider[T]) GetLoginURL(callbackUrl, state string) (s
 	return u, nil
 }
 
-func (p *_ExternalCallbackProvider[T]) GetClientID() string {
+func (p *_ExternalCallbackConnector[T]) GetClientID() string {
 	return p.ClientID
 }
 
-func (p *_ExternalCallbackProvider[T]) HandleCallback(req *http.Request) (*ExternalIdentity, error) {
+func (p *_ExternalCallbackConnector[T]) HandleCallback(req *http.Request) (*ExternalIdentity, error) {
 	conn, err := p.openConnector()
 	if err != nil {
 		return nil, fmt.Errorf("open connector: %w", err)
@@ -173,7 +183,7 @@ func getExternalConnectorFromSubjectProvider(subjProv *walrus.SubjectProvider) (
 				})
 		}
 		dst.GroupSearch.NameAttr = src.GroupSearch.NameAttribute
-		return NewExternalPasswordProvider(dst), nil
+		return NewExternalPasswordConnector(dst), nil
 	case walrus.SubjectProviderTypeOAuth:
 		src := subjProv.Spec.ExternalConfig.OAuth
 		dst := &oauth.Config{
@@ -190,7 +200,7 @@ func getExternalConnectorFromSubjectProvider(subjProv *walrus.SubjectProvider) (
 			dst.ClaimMapping.EmailKey = cm.EmailKey
 			dst.ClaimMapping.GroupsKey = cm.GroupsKey
 		}
-		return NewExternalCallbackProvider(dst, src.ClientID,
+		return NewExternalCallbackConnector(dst, src.ClientID,
 			func(s string, o *oauth.Config) { o.RedirectURI = s }), nil
 	case walrus.SubjectProviderTypeOIDC:
 		src := subjProv.Spec.ExternalConfig.Oidc
@@ -208,7 +218,7 @@ func getExternalConnectorFromSubjectProvider(subjProv *walrus.SubjectProvider) (
 			dst.ClaimMapping.EmailKey = cm.EmailKey
 			dst.ClaimMapping.GroupsKey = cm.GroupsKey
 		}
-		return NewExternalCallbackProvider(dst, src.ClientID,
+		return NewExternalCallbackConnector(dst, src.ClientID,
 			func(s string, o *oidc.Config) { o.RedirectURI = s }), nil
 	case walrus.SubjectProviderTypeGithub:
 		src := subjProv.Spec.ExternalConfig.Github
@@ -224,7 +234,7 @@ func getExternalConnectorFromSubjectProvider(subjProv *walrus.SubjectProvider) (
 				Teams: v,
 			})
 		}
-		return NewExternalCallbackProvider(dst, src.ClientID,
+		return NewExternalCallbackConnector(dst, src.ClientID,
 			func(s string, o *github.Config) { o.RedirectURI = s }), nil
 	case walrus.SubjectProviderTypeGitlab:
 		src := subjProv.Spec.ExternalConfig.Gitlab
@@ -234,7 +244,7 @@ func getExternalConnectorFromSubjectProvider(subjProv *walrus.SubjectProvider) (
 			Groups:       src.Groups,
 			UseLoginAsID: true,
 		}
-		return NewExternalCallbackProvider(dst, src.ClientID,
+		return NewExternalCallbackConnector(dst, src.ClientID,
 			func(s string, o *gitlab.Config) { o.RedirectURI = s }), nil
 	case walrus.SubjectProviderTypeBitbucket:
 		src := subjProv.Spec.ExternalConfig.Bitbucket
@@ -244,7 +254,7 @@ func getExternalConnectorFromSubjectProvider(subjProv *walrus.SubjectProvider) (
 			Teams:             src.Groups,
 			IncludeTeamGroups: true,
 		}
-		return NewExternalCallbackProvider(dst, src.ClientID,
+		return NewExternalCallbackConnector(dst, src.ClientID,
 			func(s string, o *bitbucketcloud.Config) { o.RedirectURI = s }), nil
 	case walrus.SubjectProviderTypeGitea:
 		src := subjProv.Spec.ExternalConfig.Gitea
@@ -260,7 +270,7 @@ func getExternalConnectorFromSubjectProvider(subjProv *walrus.SubjectProvider) (
 				Teams: v,
 			})
 		}
-		return NewExternalCallbackProvider(dst, src.ClientID,
+		return NewExternalCallbackConnector(dst, src.ClientID,
 			func(s string, o *gitea.Config) { o.RedirectURI = s }), nil
 	case walrus.SubjectProviderTypeGoogle:
 		src := subjProv.Spec.ExternalConfig.Google
@@ -269,7 +279,7 @@ func getExternalConnectorFromSubjectProvider(subjProv *walrus.SubjectProvider) (
 			ClientSecret: src.ClientSecret,
 			Groups:       src.Groups,
 		}
-		return NewExternalCallbackProvider(dst, src.ClientID,
+		return NewExternalCallbackConnector(dst, src.ClientID,
 			func(s string, o *google.Config) { o.RedirectURI = s }), nil
 	case walrus.SubjectProviderTypeMicrosoft:
 		src := subjProv.Spec.ExternalConfig.Microsoft
@@ -281,7 +291,60 @@ func getExternalConnectorFromSubjectProvider(subjProv *walrus.SubjectProvider) (
 			GroupNameFormat:  microsoft.GroupName,
 			EmailToLowercase: true,
 		}
-		return NewExternalCallbackProvider(dst, src.ClientID,
+		return NewExternalCallbackConnector(dst, src.ClientID,
 			func(s string, o *microsoft.Config) { o.RedirectURI = s }), nil
 	}
+}
+
+// convertSubjectFromExternalIdentity converts an ExternalIdentity to Walrus subject.
+func convertSubjectFromExternalIdentity(ctx context.Context, provider string, id *ExternalIdentity) (*walrus.Subject, error) {
+	sort.Strings(id.Groups)
+
+	// Normalize.
+	name := id.PreferredUsername
+	displayName := id.Username
+	if stringx.StringWidth(name) > stringx.StringWidth(displayName) {
+		name, displayName = displayName, name
+	}
+	name = strings.TrimSpace(strings.ToLower(name))
+	name = stringx.ReplaceFunc(name, func(r rune) rune {
+		if r == '.' || r == '-' || unicode.IsOneOf(
+			[]*unicode.RangeTable{unicode.Number, unicode.Letter}, r) {
+			return r
+		}
+		return '-'
+	})
+
+	// Create or update.
+	eSubj := &walrus.Subject{
+		ObjectMeta: meta.ObjectMeta{
+			Namespace: systemkuberes.SystemNamespaceName,
+			Name:      stringx.Join(".", provider, name), // NB(thxCode): make sure the name is unique.
+		},
+		Spec: walrus.SubjectSpec{
+			Provider:    provider,
+			Role:        walrus.SubjectRoleViewer,
+			DisplayName: displayName,
+			Description: "Login from provider",
+			Email:       id.Email,
+			Groups:      id.Groups,
+			Credential:  ptr.To(stringx.SumBytesBySHA256(id.ConnectorData)),
+		},
+	}
+	alignFn := func(aSubj *walrus.Subject) (*walrus.Subject, bool, error) {
+		aSubj.Spec.Groups = eSubj.Spec.Groups
+		aSubj.Spec.Credential = eSubj.Spec.Credential
+		return aSubj, false, nil
+	}
+	subj, err := kubeclientset.UpdateWithCtrlClient(ctx, system.LoopbackCtrlClient.Get(), eSubj,
+		kubeclientset.WithUpdateAlign(alignFn),
+		kubeclientset.WithCreateIfNotExisted[*walrus.Subject]())
+	if err != nil {
+		return nil, err
+	}
+
+	// Since the credential is a write-only field, it is not returned.
+	// We need to copy the credential back.
+	subj.Spec.Credential = eSubj.Spec.Credential
+	return subj, nil
 }

@@ -1,16 +1,97 @@
 package loopback
 
 import (
+	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/seal-io/utils/httpx"
+	"k8s.io/apimachinery/pkg/util/proxy"
+	"k8s.io/client-go/transport"
+
+	"github.com/seal-io/walrus/pkg/server/webserver/identify"
+	"github.com/seal-io/walrus/pkg/server/webserver/openapi"
+	"github.com/seal-io/walrus/pkg/server/webserver/ui"
 )
 
-func Route(r *mux.Route) {
-	r.Handler(proxy())
+func Route(r *mux.Route) openapi.Decorator {
+	p, _ := r.GetPathTemplate()
+	r.Handler(http.StripPrefix(p, index()))
+	return getOpenapiDecorate(p)
 }
 
-func proxy() http.Handler {
+func index() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Get kube config.
+		_, _, cliCfg, err := identify.GetSubjectKubeConfig(r)
+		if err != nil {
+			ui.ResponseErrorWithCode(w, http.StatusUnauthorized, err)
+			return
+		}
+
+		// Get kube target.
+		var target *url.URL
+		{
+			host := cliCfg.Host
+			if !strings.HasSuffix(host, "/") {
+				host += "/"
+			}
+			target, err = url.Parse(host)
+			if err != nil {
+				ui.ResponseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("parse loopback kubernetes host: %w", err))
+				return
+			}
+		}
+
+		// Get kube transport config.
+		tCfg, err := cliCfg.TransportConfig()
+		if err != nil {
+			ui.ResponseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get loopback kubernetes transport config: %w", err))
+			return
+		}
+
+		// Get downstream kube transport.
+		var dt proxy.UpgradeRequestRoundTripper
+		{
+			tlsCfg, err := transport.TLSConfigFor(tCfg)
+			if err != nil {
+				ui.ResponseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get loopback kubernetes tls config: %w", err))
+				return
+			}
+			wrapper, err := transport.HTTPWrappersForConfig(tCfg, proxy.MirrorRequest)
+			if err != nil {
+				ui.ResponseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get loopback kubernetes http wrappers: %w", err))
+				return
+			}
+			dt = proxy.NewUpgradeRequestRoundTripper(
+				httpx.Transport(httpx.TransportOptions().WithTLSClientConfig(tlsCfg)), wrapper)
+		}
+
+		// Get upstream kube transport.
+		ut, err := transport.New(tCfg)
+		if err != nil {
+			ui.ResponseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get loopback kubernetes transport: %w", err))
+			return
+		}
+
+		// Serve proxy.
+		p := &proxy.UpgradeAwareHandler{
+			Location:           target,
+			UpgradeTransport:   dt,
+			Transport:          ut,
+			Responder:          errResponder{},
+			WrapTransport:      true,
+			UseRequestLocation: true,
+			UseLocationHost:    true,
+		}
+		p.ServeHTTP(w, r)
 	})
+}
+
+type errResponder struct{}
+
+func (r errResponder) Error(w http.ResponseWriter, _ *http.Request, err error) {
+	ui.ResponseError(w, fmt.Errorf("proxy loopback kubernetes: %w", err))
 }

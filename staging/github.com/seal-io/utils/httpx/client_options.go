@@ -1,71 +1,55 @@
 package httpx
 
 import (
-	"context"
-	"crypto/tls"
-	"net"
 	"net/http"
 	"time"
 )
 
 type ClientOption struct {
-	transport  *http.Transport
+	*TransportOption
+
 	timeout    time.Duration
 	debug      bool
 	roundTrips []func(req *http.Request) error
 }
 
 func ClientOptions() *ClientOption {
-	transport := &http.Transport{
-		Proxy:                 http.ProxyFromEnvironment,
-		TLSClientConfig:       &tls.Config{MinVersion: tls.VersionTLS12},
-		DialContext:           (&net.Dialer{KeepAlive: -1}).DialContext,
-		ForceAttemptHTTP2:     true,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-	}
-
 	return &ClientOption{
-		transport: transport,
-		timeout:   30 * time.Second,
+		TransportOption: TransportOptions().WithoutKeepalive(),
+		timeout:         30 * time.Second,
 	}
+}
+
+// WithTransportOption sets the TransportOption.
+func (o *ClientOption) WithTransportOption(opt *TransportOption) *ClientOption {
+	if o == nil || opt == nil {
+		return o
+	}
+	o.TransportOption = opt
+	return o
 }
 
 // WithTimeout sets the request timeout.
 func (o *ClientOption) WithTimeout(timeout time.Duration) *ClientOption {
-	if timeout >= 0 {
-		o.timeout = timeout
+	if o == nil || timeout < 0 {
+		return o
 	}
+	o.timeout = timeout
 	return o
 }
 
 // WithDebug sets the debug mode.
 func (o *ClientOption) WithDebug() *ClientOption {
+	if o == nil {
+		return o
+	}
 	o.debug = true
-	return o
-}
-
-// WithoutProxy disables the proxy.
-func (o *ClientOption) WithoutProxy() *ClientOption {
-	o.transport.Proxy = nil
-	return o
-}
-
-// SkipInsecureVerify skips the insecure verify.
-func (o *ClientOption) SkipInsecureVerify() *ClientOption {
-	o.transport.TLSClientConfig.InsecureSkipVerify = true
-	return o
-}
-
-// WithDial sets the dial function.
-func (o *ClientOption) WithDial(dial func(context.Context, string, string) (net.Conn, error)) *ClientOption {
-	o.transport.DialContext = dial
 	return o
 }
 
 // WithRoundTrip sets the round trip function.
 func (o *ClientOption) WithRoundTrip(rt func(req *http.Request) error) *ClientOption {
-	if rt == nil {
+	if o == nil || rt == nil {
 		return o
 	}
 	o.roundTrips = append(o.roundTrips, rt)

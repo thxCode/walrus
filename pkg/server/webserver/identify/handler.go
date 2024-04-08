@@ -6,10 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"sort"
 	"strings"
 	"time"
-	"unicode"
 
 	"github.com/gorilla/mux"
 	"github.com/lestrrat-go/jwx/jwt"
@@ -20,6 +18,8 @@ import (
 	core "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	genericapirequest "k8s.io/apiserver/pkg/endpoints/request"
+	"k8s.io/client-go/rest"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	"k8s.io/utils/ptr"
 	ctrlcli "sigs.k8s.io/controller-runtime/pkg/client"
@@ -28,14 +28,17 @@ import (
 	"github.com/seal-io/walrus/pkg/clients/clientset"
 	"github.com/seal-io/walrus/pkg/kubeclientset"
 	"github.com/seal-io/walrus/pkg/kubeconfig"
+	"github.com/seal-io/walrus/pkg/server/webserver/openapi"
+	"github.com/seal-io/walrus/pkg/server/webserver/ui"
 	"github.com/seal-io/walrus/pkg/system"
+	"github.com/seal-io/walrus/pkg/systemauthz"
 	"github.com/seal-io/walrus/pkg/systemkuberes"
 	"github.com/seal-io/walrus/pkg/systemsetting"
 )
 
-func Route(r *mux.Route) {
+func Route(r *mux.Route) openapi.Decorator {
+	p, _ := r.GetPathTemplate()
 	sr := r.Subrouter()
-
 	sr.Path("/providers").Methods(http.MethodGet).
 		HandlerFunc(providers)
 	sr.Path("/login").Methods(http.MethodGet, http.MethodPost).
@@ -50,6 +53,7 @@ func Route(r *mux.Route) {
 		HandlerFunc(rules)
 	sr.Path("/logout").Methods(http.MethodGet).
 		HandlerFunc(logout)
+	return getOpenapiDecorate(p)
 }
 
 type (
@@ -77,7 +81,7 @@ func providers(w http.ResponseWriter, r *http.Request) {
 		cli := system.LoopbackCtrlClient.Get()
 		err := cli.List(ctx, subjProvList, ctrlcli.InNamespace(systemkuberes.SystemNamespaceName))
 		if err != nil {
-			responseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("list providers: %w", err))
+			ui.ResponseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("list providers: %w", err))
 			return
 		}
 	}
@@ -119,16 +123,16 @@ func login(w http.ResponseWriter, r *http.Request) {
 	// Login with username and password.
 	if req.Provider == "" || req.Provider == systemkuberes.DefaultSubjectProviderName {
 		if r.Method != http.MethodPost {
-			responseErrorWithCode(w, http.StatusMethodNotAllowed, nil)
+			ui.ResponseErrorWithCode(w, http.StatusMethodNotAllowed, nil)
 			return
 		}
 
 		if req.Username == "" {
-			responseErrorWithCode(w, http.StatusBadRequest, errors.New("username is required"))
+			ui.ResponseErrorWithCode(w, http.StatusBadRequest, errors.New("username is required"))
 			return
 		}
 		if req.Password == "" {
-			responseErrorWithCode(w, http.StatusBadRequest, errors.New("password is required"))
+			ui.ResponseErrorWithCode(w, http.StatusBadRequest, errors.New("password is required"))
 			return
 		}
 
@@ -142,67 +146,67 @@ func login(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 
-		loginSubject(w, r, subj)
+		loginSubject(w, r, subj, false)
 		return
 	}
 
 	// Get provider.
 	subjProv, err := getSubjectProvider(ctx, req.Provider)
 	if err != nil {
-		responseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get provider: %w", err))
+		ui.ResponseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get provider: %w", err))
 		return
 	}
 
 	// Get connector.
 	conn, err := getExternalConnectorFromSubjectProvider(subjProv)
 	if err != nil {
-		renderErrorWithCode(w, http.StatusInternalServerError, err)
+		ui.RedirectErrorWithCode(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	switch cn := conn.(type) {
 	default:
-		responseErrorWithCode(w, http.StatusBadRequest, errors.New("unsupported provider type"))
+		ui.ResponseErrorWithCode(w, http.StatusBadRequest, errors.New("unsupported provider type"))
 		return
 	case ExternalPasswordConnector:
 		// Login with password, like LDAP.
 
 		if r.Method != http.MethodPost {
-			responseErrorWithCode(w, http.StatusMethodNotAllowed, nil)
+			ui.ResponseErrorWithCode(w, http.StatusMethodNotAllowed, nil)
 			return
 		}
 
 		if req.Username == "" {
-			responseErrorWithCode(w, http.StatusBadRequest, errors.New("username is required"))
+			ui.ResponseErrorWithCode(w, http.StatusBadRequest, errors.New("username is required"))
 			return
 		}
 		if req.Password == "" {
-			responseErrorWithCode(w, http.StatusBadRequest, errors.New("password is required"))
+			ui.ResponseErrorWithCode(w, http.StatusBadRequest, errors.New("password is required"))
 			return
 		}
 
 		id, valid, err := cn.Login(ctx, req.Username, req.Password)
 		if err != nil {
-			responseErrorWithCode(w, http.StatusInternalServerError, err)
+			ui.ResponseErrorWithCode(w, http.StatusInternalServerError, err)
 			return
 		}
 		if !valid {
-			responseErrorWithCode(w, http.StatusUnauthorized, errors.New("login failed"))
+			ui.ResponseErrorWithCode(w, http.StatusUnauthorized, errors.New("login failed"))
 			return
 		}
 
-		subj, err := getSubject(ctx, req.Provider, id)
+		subj, err := convertSubjectFromExternalIdentity(ctx, req.Provider, id)
 		if err != nil {
-			responseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get subject: %w", err))
+			ui.ResponseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get subject: %w", err))
 			return
 		}
 
-		loginSubject(w, r, subj)
+		loginSubject(w, r, subj, false)
 	case ExternalCallbackConnector:
 		// Redirect to OAuth login page.
 
 		if r.Method != http.MethodGet {
-			responseErrorWithCode(w, http.StatusMethodNotAllowed, nil)
+			ui.ResponseErrorWithCode(w, http.StatusMethodNotAllowed, nil)
 			return
 		}
 
@@ -219,7 +223,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 		}
 		sec, err := kubeclientset.CreateWithCtrlClient(ctx, system.LoopbackCtrlClient.Get(), sec)
 		if err != nil {
-			responseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("create state: %w", err))
+			ui.ResponseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("create state: %w", err))
 			return
 		}
 
@@ -243,7 +247,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 		loginUrl, err := cn.GetLoginURL(callbackUrl, sec.Name)
 		if err != nil {
-			responseErrorWithCode(w, http.StatusInternalServerError, err)
+			ui.ResponseErrorWithCode(w, http.StatusInternalServerError, err)
 			return
 		}
 
@@ -271,7 +275,7 @@ func callback(w http.ResponseWriter, r *http.Request) {
 	// Get provider.
 	subjProv, err := getSubjectProvider(ctx, req.Provider)
 	if err != nil {
-		renderErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get provider: %w", err))
+		ui.RedirectErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get provider: %w", err))
 		return
 	}
 
@@ -280,7 +284,7 @@ func callback(w http.ResponseWriter, r *http.Request) {
 	{
 		conn, err := getExternalConnectorFromSubjectProvider(subjProv)
 		if err != nil {
-			renderErrorWithCode(w, http.StatusInternalServerError, err)
+			ui.RedirectErrorWithCode(w, http.StatusInternalServerError, err)
 			return
 		}
 		var ok bool
@@ -294,7 +298,7 @@ func callback(w http.ResponseWriter, r *http.Request) {
 	// Handle callback.
 	id, err := cn.HandleCallback(r)
 	if err != nil {
-		renderErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("handle callback: %w", err))
+		ui.RedirectErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("handle callback: %w", err))
 		return
 	}
 
@@ -310,9 +314,9 @@ func callback(w http.ResponseWriter, r *http.Request) {
 		err = cli.Get(ctx, ctrlcli.ObjectKeyFromObject(sec), sec)
 		if err != nil {
 			if !kerrors.IsNotFound(err) {
-				renderErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get state: %w", err))
+				ui.RedirectErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get state: %w", err))
 			} else {
-				renderErrorWithCode(w, http.StatusForbidden, errors.New("state not found"))
+				ui.RedirectErrorWithCode(w, http.StatusForbidden, errors.New("state not found"))
 			}
 			return
 		}
@@ -330,20 +334,20 @@ func callback(w http.ResponseWriter, r *http.Request) {
 			return nil
 		}()
 		if err != nil {
-			renderErrorWithCode(w, http.StatusForbidden, err)
+			ui.RedirectErrorWithCode(w, http.StatusForbidden, err)
 			return
 		}
 	}
 
 	// Get subject.
-	subj, err := getSubject(ctx, req.Provider, id)
+	subj, err := convertSubjectFromExternalIdentity(ctx, req.Provider, id)
 	if err != nil {
-		renderErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get subject: %w", err))
+		ui.RedirectErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get subject: %w", err))
 		return
 	}
 
 	// Login.
-	loginSubject(w, r, subj)
+	loginSubject(w, r, subj, true)
 }
 
 type (
@@ -358,24 +362,17 @@ type (
 //
 // GET/PUT: /profile
 func profile(w http.ResponseWriter, r *http.Request) {
-	// Get session.
-	rt, t := fetchSession(r)
-	if t == nil {
-		responseErrorWithCode(w, http.StatusUnauthorized, errors.New("unauthorized: no token"))
-		return
-	}
-
-	// Parse subject.
-	subjNamespace, subjName, ok := strings.Cut(t.Subject(), ":")
-	if !ok {
-		responseErrorWithCode(w, http.StatusUnauthorized, errors.New("unauthorized: invalid token"))
+	// Get kube config.
+	subjNamespace, subjName, cliCfg, err := GetSubjectKubeConfig(r)
+	if err != nil {
+		ui.ResponseErrorWithCode(w, http.StatusUnauthorized, err)
 		return
 	}
 
 	// Get kube client.
-	cli, err := getSubjectKubeClient(rt)
+	cli, err := clientset.NewForConfig(cliCfg)
 	if err != nil {
-		responseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get kube client: %w", err))
+		ui.ResponseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get kube client: %w", err))
 		return
 	}
 
@@ -384,7 +381,7 @@ func profile(w http.ResponseWriter, r *http.Request) {
 		subj, err := cli.WalrusV1().Subjects(subjNamespace).
 			Get(r.Context(), subjName, meta.GetOptions{ResourceVersion: "0"})
 		if err != nil {
-			responseError(w, fmt.Errorf("get profile: %w", err))
+			ui.ResponseError(w, fmt.Errorf("get profile: %w", err))
 			return
 		}
 
@@ -414,7 +411,7 @@ func profile(w http.ResponseWriter, r *http.Request) {
 	}
 	subj, err = kubeclientset.Apply(r.Context(), cli.WalrusV1().Subjects(subjNamespace), subj)
 	if err != nil {
-		responseError(w, fmt.Errorf("update profile: %w", err))
+		ui.ResponseError(w, fmt.Errorf("update profile: %w", err))
 	}
 
 	resp := subj.Spec
@@ -431,24 +428,17 @@ type (
 //
 // GET: /token?expirationSeconds={expirationSeconds}
 func token(w http.ResponseWriter, r *http.Request) {
-	// Get session.
-	rt, t := fetchSession(r)
-	if t == nil {
-		responseErrorWithCode(w, http.StatusUnauthorized, errors.New("unauthorized"))
-		return
-	}
-
-	// Parse subject.
-	subjNamespace, subjName, ok := strings.Cut(t.Subject(), ":")
-	if !ok {
-		responseErrorWithCode(w, http.StatusUnauthorized, errors.New("unauthorized: invalid token"))
+	// Get kube config.
+	subjNamespace, subjName, cliCfg, err := GetSubjectKubeConfig(r)
+	if err != nil {
+		ui.ResponseErrorWithCode(w, http.StatusUnauthorized, err)
 		return
 	}
 
 	// Get kube client.
-	cli, err := getSubjectKubeClient(rt)
+	cli, err := clientset.NewForConfig(cliCfg)
 	if err != nil {
-		responseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get kube client: %w", err))
+		ui.ResponseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get kube client: %w", err))
 		return
 	}
 
@@ -465,7 +455,7 @@ func token(w http.ResponseWriter, r *http.Request) {
 	subjToken, err = cli.WalrusV1().Subjects(subjNamespace).
 		CreateToken(r.Context(), subjName, subjToken, meta.CreateOptions{})
 	if err != nil {
-		responseError(w, fmt.Errorf("create token: %w", err))
+		ui.ResponseError(w, fmt.Errorf("create token: %w", err))
 		return
 	}
 
@@ -477,24 +467,26 @@ type (
 	requestRules struct {
 		Namespace string `path:"namespace"`
 	}
-	responseRules = []authorization.ResourceRule
+	responseRules struct {
+		Items []authorization.ResourceRule `json:"items"`
+	}
 )
 
 // rules is a handler to get rules.
 //
 // GET: /rules/{namespace}
 func rules(w http.ResponseWriter, r *http.Request) {
-	// Get session.
-	rt, t := fetchSession(r)
-	if t == nil {
-		responseErrorWithCode(w, http.StatusUnauthorized, errors.New("unauthorized: no token"))
+	// Get kube config.
+	_, _, cliCfg, err := GetSubjectKubeConfig(r)
+	if err != nil {
+		ui.ResponseErrorWithCode(w, http.StatusUnauthorized, err)
 		return
 	}
 
 	// Get kube client.
-	cli, err := getSubjectKubeClient(rt)
+	cli, err := clientset.NewForConfig(cliCfg)
 	if err != nil {
-		responseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get kube client: %w", err))
+		ui.ResponseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("get kube client: %w", err))
 		return
 	}
 
@@ -511,18 +503,28 @@ func rules(w http.ResponseWriter, r *http.Request) {
 	rev, err = cli.AuthorizationV1().SelfSubjectRulesReviews().
 		Create(r.Context(), rev, meta.CreateOptions{})
 	if err != nil {
-		responseError(w, fmt.Errorf("create self subject rules reviews: %w", err))
+		ui.ResponseError(w, fmt.Errorf("create self subject rules reviews: %w", err))
 		return
 	}
 
-	resp := make(responseRules, 0, len(rev.Status.ResourceRules))
+	resp := responseRules{
+		Items: make([]authorization.ResourceRule, 0, len(rev.Status.ResourceRules)),
+	}
 	for i := range rev.Status.ResourceRules {
+		var found bool
 		for j := range rev.Status.ResourceRules[i].APIGroups {
 			if rev.Status.ResourceRules[i].APIGroups[j] != walrus.GroupName {
 				continue
 			}
-			resp = append(resp, rev.Status.ResourceRules[i])
+			found = true
+			break
 		}
+		if !found {
+			continue
+		}
+		item := rev.Status.ResourceRules[i]
+		item.APIGroups = []string{walrus.GroupName}
+		resp.Items = append(resp.Items, item)
 	}
 	httpx.JSON(w, http.StatusOK, resp)
 }
@@ -543,45 +545,36 @@ const (
 	_AuthorizationBasicPrefix  = "Basic "
 )
 
-func fetchSession(r *http.Request) (rt string, t jwt.Token) {
+// fetchSession fetches the session token from the request.
+func fetchSession(r *http.Request) string {
 	if r == nil {
-		return
+		return ""
 	}
 
 	if c, err := r.Cookie(_AuthenticationCookie); err == nil {
-		rt = c.Value
-		t, _ = jwt.Parse(stringx.ToBytes(&rt))
-		return
+		return c.Value
 	}
 
-	h := r.Header.Get(_AuthorizationHeader)
-	if h == "" {
-		return
-	}
-
-	if strings.HasPrefix(h, _AuthorizationBearerPrefix) {
-		rt = strings.TrimPrefix(h, _AuthorizationBearerPrefix)
-		t, _ = jwt.Parse(stringx.ToBytes(&rt))
-		return
-	}
-
-	if strings.HasPrefix(h, _AuthorizationBasicPrefix) {
-		c, err := stringx.DecodeBase64(strings.TrimPrefix(h, _AuthorizationBasicPrefix))
-		if err != nil {
-			return
+	if h := r.Header.Get(_AuthorizationHeader); h != "" {
+		switch {
+		case strings.HasPrefix(h, _AuthorizationBearerPrefix):
+			t := strings.TrimPrefix(h, _AuthorizationBearerPrefix)
+			return t
+		case strings.HasPrefix(h, _AuthorizationBasicPrefix):
+			c, err := stringx.DecodeBase64(strings.TrimPrefix(h, _AuthorizationBasicPrefix))
+			if err == nil {
+				_, p, ok := strings.Cut(c, ":")
+				if ok && p != "" {
+					return p
+				}
+			}
 		}
-		_, p, ok := strings.Cut(c, ":")
-		if !ok {
-			return
-		}
-		rt = p
-		t, _ = jwt.Parse(stringx.ToBytes(&rt))
-		return
 	}
 
-	return
+	return ""
 }
 
+// assignSession assigns a session token to the response writer.
 func assignSession(w http.ResponseWriter, token string) {
 	exp := funcx.NoError(jwt.Parse(stringx.ToBytes(&token))).Expiration()
 	c := &http.Cookie{
@@ -597,6 +590,7 @@ func assignSession(w http.ResponseWriter, token string) {
 	http.SetCookie(w, c)
 }
 
+// revertSession reverts the session token from the response writer.
 func revertSession(w http.ResponseWriter) {
 	c := &http.Cookie{
 		Name:     _AuthenticationCookie,
@@ -611,6 +605,7 @@ func revertSession(w http.ResponseWriter) {
 	http.SetCookie(w, c)
 }
 
+// getSubjectProvider gets the subject provider.
 func getSubjectProvider(ctx context.Context, provider string) (*walrus.SubjectProvider, error) {
 	subjProv := &walrus.SubjectProvider{
 		ObjectMeta: meta.ObjectMeta{
@@ -626,69 +621,8 @@ func getSubjectProvider(ctx context.Context, provider string) (*walrus.SubjectPr
 	return subjProv, nil
 }
 
-func getSubject(ctx context.Context, provider string, id *ExternalIdentity) (*walrus.Subject, error) {
-	sort.Strings(id.Groups)
-
-	// Normalize.
-	name := id.PreferredUsername
-	displayName := id.Username
-	if stringx.StringWidth(name) > stringx.StringWidth(displayName) {
-		name, displayName = displayName, name
-	}
-	name = strings.TrimSpace(strings.ToLower(name))
-	name = stringx.ReplaceFunc(name, func(r rune) rune {
-		if r == '.' || r == '-' || unicode.IsOneOf(
-			[]*unicode.RangeTable{unicode.Number, unicode.Letter}, r) {
-			return r
-		}
-		return '-'
-	})
-
-	// Create or update.
-	eSubj := &walrus.Subject{
-		ObjectMeta: meta.ObjectMeta{
-			Namespace: systemkuberes.SystemNamespaceName,
-			Name:      stringx.Join(".", provider, name), // NB(thxCode): make sure the name is unique.
-		},
-		Spec: walrus.SubjectSpec{
-			Provider:    provider,
-			Role:        walrus.SubjectRoleViewer,
-			DisplayName: displayName,
-			Description: "Login from provider",
-			Email:       id.Email,
-			Groups:      id.Groups,
-			Credential:  ptr.To(stringx.SumBytesBySHA256(id.ConnectorData)),
-		},
-	}
-	alignFn := func(aSubj *walrus.Subject) (*walrus.Subject, bool, error) {
-		aSubj.Spec.Groups = eSubj.Spec.Groups
-		aSubj.Spec.Credential = eSubj.Spec.Credential
-		return aSubj, false, nil
-	}
-	subj, err := kubeclientset.UpdateWithCtrlClient(ctx, system.LoopbackCtrlClient.Get(), eSubj,
-		kubeclientset.WithUpdateAlign(alignFn),
-		kubeclientset.WithCreateIfNotExisted[*walrus.Subject]())
-	if err != nil {
-		return nil, err
-	}
-
-	// Since the credential is a write-only field, it is not returned.
-	// We need to copy the credential back.
-	subj.Spec.Credential = eSubj.Spec.Credential
-	return subj, nil
-}
-
-func getSubjectKubeClient(token string) (clientset.Interface, error) {
-	cliCfg, err := kubeconfig.WrapRestConfigWithAuthInfo(system.LoopbackKubeClientConfig.Get(),
-		clientcmdapi.AuthInfo{Token: token})
-	if err != nil {
-		return nil, err
-	}
-
-	return clientset.NewForConfig(cliCfg)
-}
-
-func loginSubject(w http.ResponseWriter, r *http.Request, subj *walrus.Subject) {
+// loginSubject logs in with the subject.
+func loginSubject(w http.ResponseWriter, r *http.Request, subj *walrus.Subject, redirect bool) {
 	cli := system.LoopbackKubeClient.Get()
 
 	subjl := &walrus.SubjectLogin{
@@ -704,66 +638,60 @@ func loginSubject(w http.ResponseWriter, r *http.Request, subj *walrus.Subject) 
 	subjl, err := cli.WalrusV1().Subjects(systemkuberes.SystemNamespaceName).
 		Login(r.Context(), subj.Name, subjl, meta.CreateOptions{})
 	if err != nil {
-		code := http.StatusInternalServerError
-		switch {
-		case kerrors.IsInvalid(err):
-			code = http.StatusBadRequest
-		case kerrors.IsBadRequest(err):
-			code = http.StatusBadRequest
+		if redirect {
+			ui.RedirectError(w, fmt.Errorf("login: %w", err))
+		} else {
+			ui.ResponseError(w, fmt.Errorf("login: %w", err))
 		}
-		renderErrorWithCode(w, code, fmt.Errorf("login: %w", err))
 		return
 	}
 
 	assignSession(w, subjl.Status.Token)
-	http.Redirect(w, r, "/", http.StatusFound)
-}
-
-func responseErrorWithCode(w http.ResponseWriter, code int, err error) {
-	s := meta.Status{
-		TypeMeta: meta.TypeMeta{
-			APIVersion: "meta.k8s.io/v1",
-			Kind:       "Status",
-		},
-		Status: meta.StatusFailure,
-		Reason: meta.StatusReason(stringx.TrimAllSpace(http.StatusText(code))),
-		Code:   int32(code),
-	}
-	if err != nil {
-		s.Message = err.Error()
-	}
-
-	httpx.JSON(w, code, s)
-}
-
-func responseError(w http.ResponseWriter, err error) {
-	rerr := errors.Unwrap(err)
-	switch {
-	case kerrors.IsInvalid(rerr):
-		responseErrorWithCode(w, http.StatusBadRequest, err)
-	case kerrors.IsUnauthorized(rerr):
-		responseErrorWithCode(w, http.StatusUnauthorized, err)
-	case kerrors.IsNotFound(rerr):
-		responseErrorWithCode(w, http.StatusNotFound, err)
-	default:
-		responseErrorWithCode(w, http.StatusInternalServerError, err)
+	if redirect {
+		http.Redirect(w, r, "/", http.StatusFound)
 	}
 }
 
-func renderErrorWithCode(w http.ResponseWriter, code int, err error) {
-	s := meta.Status{
-		TypeMeta: meta.TypeMeta{
-			APIVersion: "meta.k8s.io/v1",
-			Kind:       "Status",
-		},
-		Status: meta.StatusFailure,
-		Reason: meta.StatusReason(stringx.TrimAllSpace(http.StatusText(code))),
-		Code:   int32(code),
-	}
-	if err != nil {
-		s.Message = err.Error()
+// GetSubjectKubeConfig returns subject-specified Kubernetes rest config and subject names according to the request.
+func GetSubjectKubeConfig(r *http.Request) (subjNamespace, subjName string, cliCfg *rest.Config, err error) {
+	s := fetchSession(r)
+	if s == "" {
+		user, ok := genericapirequest.UserFrom(r.Context())
+		if ok {
+			subjNamespace, subjName, ok = systemauthz.ConvertSubjectNamesFromAuthnUser(user)
+			if ok {
+				cliCfg = kubeconfig.WrapRestConfigWithAuthInfo(system.LoopbackKubeClientConfig.Get(),
+					clientcmdapi.AuthInfo{
+						Impersonate:          user.GetName(),
+						ImpersonateUID:       user.GetUID(),
+						ImpersonateGroups:    user.GetGroups(),
+						ImpersonateUserExtra: user.GetExtra(),
+					})
+				return
+			}
+		}
+
+		if system.DisableAuths.Get() {
+			return systemkuberes.SystemNamespaceName, systemkuberes.AdminSubjectName, ptr.To(system.LoopbackKubeClientConfig.Get()), nil
+		}
+
+		return "", "", nil, errors.New("no token")
 	}
 
-	// TODO: redirect to error page
-	httpx.JSON(w, code, s)
+	t, err := jwt.Parse(stringx.ToBytes(&s))
+	if err == nil {
+		var ok bool
+		subjNamespace, subjName, ok = systemauthz.ConvertSubjectNamesFromJwtToken(t)
+		if ok {
+			cliCfg = kubeconfig.WrapRestConfigWithAuthInfo(system.LoopbackKubeClientConfig.Get(),
+				clientcmdapi.AuthInfo{Token: s})
+			return
+		}
+	}
+
+	if system.DisableAuths.Get() {
+		return systemkuberes.SystemNamespaceName, systemkuberes.AdminSubjectName, ptr.To(system.LoopbackKubeClientConfig.Get()), nil
+	}
+
+	return "", "", nil, errors.New("no token")
 }

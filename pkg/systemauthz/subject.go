@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/lestrrat-go/jwx/jwt"
 	"github.com/seal-io/utils/stringx"
 	rbac "k8s.io/api/rbac/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,12 +28,12 @@ func ConvertImpersonateUserFromSubjectName(subjNamespace, subjName string) (impe
 //
 // If the impersonate user is not a subject-delegated impersonate user,
 // it returns empty strings.
-func ConvertSubjectNamesFromImpersonateUser(impersonateUser string) (subjNamespace, subjName string) {
-	subjNamespace, subjName, ok := strings.Cut(strings.TrimPrefix(impersonateUser, "walrus:"), ":")
+func ConvertSubjectNamesFromImpersonateUser(impersonateUser string) (subjNamespace, subjName string, ok bool) {
+	subjNamespace, subjName, ok = strings.Cut(strings.TrimPrefix(impersonateUser, "walrus:"), ":")
 	if ok && subjNamespace != "" && subjName != "" {
-		return subjNamespace, subjName
+		return subjNamespace, subjName, true
 	}
-	return "", ""
+	return "", "", false
 }
 
 // ConvertServiceAccountNameFromSubjectName converts the subject name to a service account name.
@@ -56,23 +57,35 @@ func ConvertSubjectNameFromServiceAccountName(saName string) (subjName string) {
 //
 // If the authentication user is not a subject-delegated authentication user(impersonate user or service account),
 // it returns empty strings.
-func ConvertSubjectNamesFromAuthnUser(user authnuser.Info) (subjNamespace, subjName string) {
+func ConvertSubjectNamesFromAuthnUser(user authnuser.Info) (subjNamespace, subjName string, ok bool) {
 	un := user.GetName()
 	switch {
 	default:
-		return "", ""
+		return "", "", false
 	case strings.HasPrefix(un, "walrus:"):
 		return ConvertSubjectNamesFromImpersonateUser(un)
 	case strings.HasPrefix(un, "system:serviceaccount:"):
 	}
-	subjNamespace, subjName, ok := strings.Cut(strings.TrimPrefix(un, "system:serviceaccount:"), ":")
+	subjNamespace, subjName, ok = strings.Cut(strings.TrimPrefix(un, "system:serviceaccount:"), ":")
 	if ok {
 		subjName = ConvertSubjectNameFromServiceAccountName(subjName)
 	}
 	if subjNamespace != "" && subjName != "" {
-		return subjNamespace, subjName
+		return subjNamespace, subjName, true
 	}
-	return "", ""
+	return "", "", false
+}
+
+// ConvertSubjectNamesFromJwtToken converts the JWT token to the subject {namespace,name} pair.
+//
+// If the JWT token is not a subject-delegated JWT token,
+// it returns empty strings.
+func ConvertSubjectNamesFromJwtToken(token jwt.Token) (subjNamespace, subjName string, ok bool) {
+	subjNamespace, subjName, ok = strings.Cut(strings.TrimPrefix(token.Subject(), "system:serviceaccount:"), ":")
+	if ok && subjNamespace != "" && subjName != "" {
+		return subjNamespace, subjName, true
+	}
+	return "", "", false
 }
 
 // GrantSubject (re)grants the role of the subject for the subject.
