@@ -64,6 +64,7 @@ ENV K3S_DATA_DIR=/var/lib/k3s \
     ETCDCTL_API=3
 COPY --from=rancher/k3s:v1.27.11-k3s1 \
     /bin/blkid \
+    /bin/bandwidth \
     /bin/cni \
     /bin/conntrack \
     /bin/containerd \
@@ -123,7 +124,7 @@ RUN set -exo pipefail; \
     crane pull --platform=${TARGETPLATFORM} ${WORKFLOW_CONTROLLER_IMAGE} ${K3S_DATA_DIR}/agent/images/workflow-controller.tar; \
     crane pull --platform=${TARGETPLATFORM} ${WORKFLOW_EXECUTOR_IMAGE} ${K3S_DATA_DIR}/agent/images/workflow-executor.tar; \
     crane pull --platform=${TARGETPLATFORM} ${WORKFLOW_STEP_IMAGE} ${K3S_DATA_DIR}/agent/images/workflow-step.tar
-ADD https://github.com/argoproj/argo-helm/releases/download/argo-workflows-0.41.1/argo-workflows-0.41.1.tgz "${WALRUS_LID_DIR}/argo-workflows.tgz"
+ADD https://github.com/argoproj/argo-helm/releases/download/argo-workflows-0.41.1/argo-workflows-0.41.1.tgz "${WALRUS_LID_DIR}/charts/argo-workflows.tgz"
 
 # get storage tools
 ## NB: please update the following files if changed.
