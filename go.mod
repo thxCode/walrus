@@ -2,23 +2,31 @@ module github.com/seal-io/walrus
 
 go 1.21
 
-// NB(thxCode): This is a temporary workaround to avoid the following error:
+// This is a temporary workaround to avoid the following error:
+// - Cannot vendor dex as utils directly as its api package does not have a root go.mod file.
 // - Cannot compile k8s utils package as it relies on prometheus common#v0.47.0.
 replace (
+	github.com/dexidp/dex => ./staging/github.com/dexidp/dex
+	github.com/dexidp/dex/api/v2 => ./staging/github.com/dexidp/dex/api/v2
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.18.0
 	github.com/prometheus/common => github.com/prometheus/common v0.47.0
 )
 
+// This is a workaround to support generating proto from base external packages.
+// If we bump the version of the base external packages, we need to update the staging.
 replace (
-	github.com/dexidp/dex => ./staging/github.com/dexidp/dex
-	github.com/dexidp/dex/api/v2 => ./staging/github.com/dexidp/dex/api/v2
-	github.com/drone/go-scm => ./staging/github.com/drone/go-scm
-	github.com/go-logr/logr => ./staging/github.com/go-logr/logr
 	github.com/gogo/protobuf => ./staging/github.com/gogo/protobuf
-	github.com/seal-io/code-generator => ./staging/github.com/seal-io/code-generator
-	github.com/seal-io/utils => ./staging/github.com/seal-io/utils
 	k8s.io/api => ./staging/k8s.io/api
 	k8s.io/apimachinery => ./staging/k8s.io/apimachinery
+	k8s.io/kube-aggregator => ./staging/k8s.io/kube-aggregator
+)
+
+// These packages are modified to support the walrus project.
+replace (
+	github.com/drone/go-scm => ./staging/github.com/drone/go-scm
+	github.com/go-logr/logr => ./staging/github.com/go-logr/logr
+	github.com/seal-io/code-generator => ./staging/github.com/seal-io/code-generator
+	github.com/seal-io/utils => ./staging/github.com/seal-io/utils
 	k8s.io/code-generator => ./staging/k8s.io/code-generator
 	k8s.io/klog/v2 => ./staging/k8s.io/klog
 )
