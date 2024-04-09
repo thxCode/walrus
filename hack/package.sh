@@ -120,15 +120,15 @@ function package() {
   local actions=()
   IFS=" " read -r -a actions <<<"$(seal::util::find_subdirs "${path}")"
 
+  # prepare context.
+  local context="${PACKAGE_DIR}/${target}/${task}"
+  rm -rf "${context}"
+  mkdir -p "${context}"
+
+  # copy build result to "${context}/build/".
+  cp -rf "${ROOT_DIR}/.dist/build/${target}" "${context}/build"
+
   for action in "${actions[@]}"; do
-    # prepare context.
-    local context="${PACKAGE_DIR}/${target}/${task}"
-    rm -rf "${context}"
-    mkdir -p "${context}"
-
-    # copy build result to "${context}/build/".
-    cp -rf "${ROOT_DIR}/.dist/build/${target}" "${context}/build"
-
     case "${action}" in
     image)
       # copy image assets to "${context}/image/".
