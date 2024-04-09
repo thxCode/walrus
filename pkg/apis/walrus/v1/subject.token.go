@@ -25,7 +25,13 @@ type SubjectTokenSpec struct {
 	// ExpirationSeconds is the requested duration of validity of the request. The
 	// token issuer may return a token with a different validity duration so a
 	// client needs to check the 'expiration' field in a response.
+	//
+	// The value must be non-negative.
+	// The maximum value is controlled by the loopback Kubernetes Cluster ApiServer.
+	//
 	// +optional
+	// +k8s:validation:minimum=0
+	// +k8s:validation:exclusiveMinimum
 	ExpirationSeconds *int64 `json:"expirationSeconds,omitempty"`
 }
 

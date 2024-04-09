@@ -15,6 +15,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	common "k8s.io/kube-openapi/pkg/common"
 	spec "k8s.io/kube-openapi/pkg/validation/spec"
+	ptr "k8s.io/utils/ptr"
 )
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
@@ -2638,9 +2639,11 @@ func schema_pkg_apis_walrus_v1_SubjectTokenSpec(ref common.ReferenceCallback) co
 				Properties: map[string]spec.Schema{
 					"expirationSeconds": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ExpirationSeconds is the requested duration of validity of the request. The token issuer may return a token with a different validity duration so a client needs to check the 'expiration' field in a response.",
-							Type:        []string{"integer"},
-							Format:      "int64",
+							Description:      "ExpirationSeconds is the requested duration of validity of the request. The token issuer may return a token with a different validity duration so a client needs to check the 'expiration' field in a response.\n\nThe value must be non-negative. The maximum value is controlled by the loopback Kubernetes Cluster ApiServer.",
+							Minimum:          ptr.To[float64](0),
+							ExclusiveMinimum: true,
+							Type:             []string{"integer"},
+							Format:           "int64",
 						},
 					},
 				},

@@ -3,6 +3,7 @@ package walrus
 import (
 	"context"
 
+	"github.com/seal-io/utils/funcx"
 	"github.com/seal-io/utils/stringx"
 	"golang.org/x/crypto/bcrypt"
 	authentication "k8s.io/api/authentication/v1"
@@ -19,6 +20,7 @@ import (
 	"github.com/seal-io/walrus/pkg/extensionapi"
 	"github.com/seal-io/walrus/pkg/systemauthz"
 	"github.com/seal-io/walrus/pkg/systemmeta"
+	"github.com/seal-io/walrus/pkg/systemsetting"
 )
 
 // SubjectLoginHandler is a handler for v1.SubjectLogin objects,
@@ -89,9 +91,13 @@ func (h *SubjectLoginHandler) OnCreate(ctx context.Context, obj runtime.Object, 
 	}
 
 	// Generate a token.
+	es := funcx.NoError(systemsetting.SubjectLoginExpirationSeconds.ValueInt64(ctx))
+	if es < 3600 {
+		es = 3600
+	}
 	tr := &authentication.TokenRequest{
 		Spec: authentication.TokenRequestSpec{
-			ExpirationSeconds: ptr.To[int64](3600), // 1 hour.
+			ExpirationSeconds: ptr.To[int64](es),
 		},
 	}
 	err = h.Client.SubResource("token").Create(ctx, sa, tr)

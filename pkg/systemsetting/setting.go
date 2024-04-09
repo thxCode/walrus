@@ -347,6 +347,28 @@ var (
 		setting.InitializeFromEnv("kubernetes"),
 		setting.Disallow,
 	)
+	SubjectLoginExpirationSeconds = newSetting(
+		"subject-login-expiration-seconds",
+		"Indicates the expiration seconds of the subject login, "+
+			"it is also controlled by the loopback Kubernetes Cluster ApiServer. "+
+			"The default is an hour, it can be configured to no larger than 24 hours. "+
+			"Reasonable value should be provided, "+
+			"so that the login can keep a balance between security and convenience.",
+		_SettingPropEditable,
+		setting.InitializeFrom("3600"),
+		setting.AdmitWith(setting.DisallowBlank, setting.AllowUint64InRange(3600, 3600*24)),
+	)
+	SubjectTokenMaximumExpirationSeconds = newSetting(
+		"subject-token-maximum-expiration-seconds",
+		"Indicates the maximum expiration seconds of the subject token, "+
+			"it is also controlled by the loopback Kubernetes Cluster ApiServer. "+
+			"The default is 2 hours. "+
+			"Reasonable value should be provided, "+
+			"so that the token does not have an excessively long validity period.",
+		_SettingPropEditable,
+		setting.InitializeFrom("7200"),
+		setting.AdmitWith(setting.DisallowBlank, setting.AllowUint64),
+	)
 )
 
 // the built-in settings for server cron jobs.

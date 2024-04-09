@@ -2,6 +2,7 @@ package walrus
 
 import (
 	"context"
+	"fmt"
 
 	authentication "k8s.io/api/authentication/v1"
 	core "k8s.io/api/core/v1"
@@ -16,6 +17,7 @@ import (
 	walrus "github.com/seal-io/walrus/pkg/apis/walrus/v1"
 	"github.com/seal-io/walrus/pkg/extensionapi"
 	"github.com/seal-io/walrus/pkg/systemauthz"
+	"github.com/seal-io/walrus/pkg/systemsetting"
 )
 
 // SubjectTokenHandler is the handler for v1.SubjectToken objects,
@@ -57,15 +59,21 @@ func (h *SubjectTokenHandler) OnCreate(ctx context.Context, obj runtime.Object, 
 	// Validate.
 	{
 		var errs field.ErrorList
-		switch es := ptr.Deref(subjt.Spec.ExpirationSeconds, 0); {
-		case es < 0:
+		if es := ptr.Deref(subjt.Spec.ExpirationSeconds, 0); es <= 0 {
 			errs = append(errs, field.Invalid(
 				field.NewPath("spec.expirationSeconds"), subjt.Spec.ExpirationSeconds, "must be greater than 0"),
 			)
-		case es > 6*3600:
-			errs = append(errs, field.Invalid(
-				field.NewPath("spec.expirationSeconds"), subjt.Spec.ExpirationSeconds, "must be less than 6 hours"),
-			)
+		} else {
+			limit, err := systemsetting.SubjectTokenMaximumExpirationSeconds.ValueInt64(ctx)
+			if err != nil {
+				return nil, kerrors.NewInternalError(err)
+			}
+			if es > limit {
+				errs = append(errs, field.Invalid(
+					field.NewPath("spec.expirationSeconds"), subjt.Spec.ExpirationSeconds,
+					fmt.Sprintf("must be less than %v", limit)),
+				)
+			}
 		}
 		if len(errs) > 0 {
 			return nil, kerrors.NewInvalid(walrus.SchemeKind("subjecttokens"), subjt.Name, errs)

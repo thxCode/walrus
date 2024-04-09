@@ -135,6 +135,21 @@ func AllowInt64(ctx context.Context, oldVal, newVal string) error {
 	return err
 }
 
+// AllowInt64InRange implements the Admission stereotype,
+// which means the value can be modified if it's int64 and in the given range.
+func AllowInt64InRange(min, max int64) Admission {
+	return func(ctx context.Context, oldVal, newVal string) error {
+		v, err := strconv.ParseInt(newVal, 10, 64)
+		if err != nil {
+			return err
+		}
+		if v < min || v > max {
+			return fmt.Errorf("value %d is out of range [%d, %d]", v, min, max)
+		}
+		return nil
+	}
+}
+
 // AllowUint64 implements the Admission stereotype,
 // which means the value can be modified if it's uint64.
 func AllowUint64(ctx context.Context, oldVal, newVal string) error {
@@ -142,11 +157,63 @@ func AllowUint64(ctx context.Context, oldVal, newVal string) error {
 	return err
 }
 
+// AllowUint64InRange implements the Admission stereotype,
+// which means the value can be modified if it's uint64 and in the given range.
+func AllowUint64InRange(min, max uint64) Admission {
+	return func(ctx context.Context, oldVal, newVal string) error {
+		v, err := strconv.ParseUint(newVal, 10, 64)
+		if err != nil {
+			return err
+		}
+		if v < min || v > max {
+			return fmt.Errorf("value %d is out of range [%d, %d]", v, min, max)
+		}
+		return nil
+	}
+}
+
 // AllowFloat64 implements the Admission stereotype,
 // which means the value can be modified if it's float64.
 func AllowFloat64(ctx context.Context, oldVal, newVal string) error {
 	_, err := strconv.ParseFloat(newVal, 64)
 	return err
+}
+
+// AllowFloat64InRange implements the Admission stereotype,
+// which means the value can be modified if it's float64 and in the given range.
+func AllowFloat64InRange(min, max float64) Admission {
+	return func(ctx context.Context, oldVal, newVal string) error {
+		v, err := strconv.ParseFloat(newVal, 64)
+		if err != nil {
+			return err
+		}
+		if v < min || v > max {
+			return fmt.Errorf("value %f is out of range [%f, %f]", v, min, max)
+		}
+		return nil
+	}
+}
+
+// AllowDuration implements the Admission stereotype,
+// which means the value can be modified if it's duration.
+func AllowDuration(ctx context.Context, oldVal, newVal string) error {
+	_, err := time.ParseDuration(newVal)
+	return err
+}
+
+// AllowDurationInRange implements the Admission stereotype,
+// which means the value can be modified if it's float64 and in the given range.
+func AllowDurationInRange(min, max time.Duration) Admission {
+	return func(ctx context.Context, oldVal, newVal string) error {
+		v, err := time.ParseDuration(newVal)
+		if err != nil {
+			return err
+		}
+		if v < min || v > max {
+			return fmt.Errorf("value %v is out of range [%v, %v]", v, min, max)
+		}
+		return nil
+	}
 }
 
 // AllowUrl implements the Admission stereotype,
