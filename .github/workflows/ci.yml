@@ -95,6 +95,11 @@ jobs:
       id-token: write
     timeout-minutes: 60
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+          - target: walrus
+            task: walrus
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -126,7 +131,7 @@ jobs:
         id: metadata
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REPO }}/${{ matrix.target }}
+          images: "${{ env.REPO }}/${{ matrix.target == matrix.task && matrix.target || format('{0}-{1}', matrix.target, matrix.task) }}"
       - name: Package
         uses: docker/build-push-action@v5
         id: package
@@ -173,7 +178,7 @@ jobs:
           SLSA_GITHUB_GENERATOR: "slsa-generator-container-linux-amd64"
           SLSA_GITHUB_GENERATOR_VERSION: "v1.5.0"
           GITHUB_CONTEXT: "${{ toJSON(github) }}"
-          UNTRUSTED_IMAGE: "${{ env.REPO }}/${{ matrix.target }}"
+          UNTRUSTED_IMAGE: "${{ env.REPO }}/${{ matrix.target == matrix.task && matrix.target || format('{0}-{1}', matrix.target, matrix.task) }}"
           UNTRUSTED_DIGEST: "${{ steps.package.outputs.digest }}"
           DOCKERHUB_USERNAME: "${{ secrets.CI_DOCKERHUB_USERNAME }}"
           DOCKERHUB_PASSWORD: "${{ secrets.CI_DOCKERHUB_PASSWORD }}"
@@ -187,7 +192,7 @@ jobs:
           secret_key: ${{ secrets.CI_TECENTCOS_SECRET_KEY }}
           cos_bucket: ${{ secrets.COS_BUCKET }}
           cos_region: ${{ secrets.COS_REGION }}
-          local_path: .dist/package/${{ matrix.target }}/${{ matrix.task }}/release
+          local_path: .dist/package/${{ matrix.target }}/${{ matrix.task }}/build
           remote_path: releases/${{ steps.metadata.outputs.version == 'main' && 'latest' || steps.metadata.outputs.version }}
           accelerate: true
           clean: false
@@ -198,4 +203,4 @@ jobs:
           fail_on_unmatched_files: true
           tag_name: ${{ steps.metadata.outputs.version }}
           prerelease: ${{ contains(github.ref, 'rc') }}
-          files: .dist/package/${{ matrix.target }}/${{ matrix.task }}/release/*
+          files: .dist/package/${{ matrix.target }}/${{ matrix.task }}/build/*

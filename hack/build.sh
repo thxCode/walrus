@@ -40,11 +40,16 @@ function build() {
     IFS="/" read -r -a os_arch <<<"${platform}"
     local os="${os_arch[0]}"
     local arch="${os_arch[1]}"
+    local output
+    output="${BUILD_DIR}/${target}/${target}-${task}-${os}-${arch}"
+    if [[ "${os}" == "windows" ]]; then
+      output="${output}.exe"
+    fi
     GOOS=${os} GOARCH=${arch} CGO_ENABLED=0 go build \
       -trimpath \
       -ldflags="${ldflags[*]}" \
       -tags="${os} ${tags[*]}" \
-      -o="${BUILD_DIR}/${target}/${target}-${task}-${os}-${arch}" \
+      -o="${output}" \
       "${path}"
   done
 }
