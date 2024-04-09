@@ -413,7 +413,7 @@ func (s UpdateOperation) Update(
 		return nil, false, kerrors.NewInternalError(err)
 	}
 
-	if om.GetResourceVersion() == "" {
+	if om.GetResourceVersion() == "0" {
 		gk := qualifiedKindFromContext(ctx)
 		errs := field.ErrorList{field.Invalid(
 			field.NewPath("metadata.resourceVersion"), 0, "must be specified for an update",

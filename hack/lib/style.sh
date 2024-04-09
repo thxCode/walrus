@@ -5,11 +5,11 @@
 # following variables:
 #
 # GOIMPORT_REVISER_VERSION  -  The Goimports-reviser version, default is v3.6.4.
-#    GOLANGCI_LINT_VERSION  -  The Golangci-lint version, default is v1.56.2.
+#    GOLANGCI_LINT_VERSION  -  The Golangci-lint version, default is v1.57.2.
 #        COMMITSAR_VERSION  -  The Commitsar version, default is v0.20.2.
 
 goimports_reviser_version=${GOIMPORT_REVISER_VERSION:-"v3.6.4"}
-golangci_lint_version=${GOLANGCI_LINT_VERSION:-"v1.56.2"}
+golangci_lint_version=${GOLANGCI_LINT_VERSION:-"v1.57.2"}
 commitsar_version=${COMMITSAR_VERSION:-"v0.20.2"}
 
 function seal::lint::golangci_lint::install() {
@@ -97,8 +97,8 @@ function seal::lint::run() {
   )
   local goimports_excludes=()
   for arg in "$@"; do
-    if [[ "${arg}" == "--skip-dirs="* ]]; then
-      arg="${arg//--skip-dirs=/}"
+    if [[ "${arg}" == "--exclude-dirs="* ]]; then
+      arg="${arg//--exclude-dirs=/}"
       goimports_excludes+=("${arg}")
     fi
   done

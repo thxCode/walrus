@@ -429,11 +429,9 @@ func convertServiceAccountListOptsFromSubjectListOpts(in ctrlcli.ListOptions) (o
 
 func convertServiceAccountFromSubject(subj *walrus.Subject) (*core.ServiceAccount, error) {
 	sa := &core.ServiceAccount{
-		ObjectMeta: meta.ObjectMeta{
-			Namespace: subj.Namespace,
-			Name:      systemauthz.ConvertServiceAccountNameFromSubjectName(subj.Name),
-		},
+		ObjectMeta: subj.ObjectMeta,
 	}
+	sa.Name = systemauthz.ConvertServiceAccountNameFromSubjectName(subj.Name)
 
 	notes := map[string]string{
 		"provider":    subj.Spec.Provider,
@@ -451,9 +449,9 @@ func convertServiceAccountFromSubject(subj *walrus.Subject) (*core.ServiceAccoun
 		}
 		notes["armorCredential"] = stringx.FromBytes(&bs)
 	}
-
 	systemmeta.NoteResource(sa, "subjects", notes)
 
+	kubemeta.SanitizeLastAppliedAnnotation(sa)
 	return sa, nil
 }
 
@@ -485,6 +483,8 @@ func convertSubjectFromServiceAccount(sa *core.ServiceAccount) *walrus.Subject {
 		subj.Spec.Groups = strings.Split(v, ",")
 	}
 	subj.Name = subjName
+
+	kubemeta.OverwriteLastAppliedAnnotation(subj)
 	return subj
 }
 

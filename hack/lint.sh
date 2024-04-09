@@ -30,7 +30,7 @@ function lint() {
     opts+=("--build-tags=\"${tags[*]}\"")
   fi
   for ig in "${ignored_path[@]}"; do
-    opts+=("--skip-dirs=${ig}")
+    opts+=("--exclude-dirs=${ig}")
   done
   opts+=("${path}/...")
   GOLANGCI_LINT_CACHE="$(go env GOCACHE)/golangci-lint" seal::lint::run "${opts[@]}"
