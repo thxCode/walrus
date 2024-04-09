@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/lestrrat-go/jwx/jwt"
 	"github.com/seal-io/utils/stringx"
 	rbac "k8s.io/api/rbac/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -53,20 +52,12 @@ func ConvertSubjectNameFromServiceAccountName(saName string) (subjName string) {
 	return ""
 }
 
-// ConvertSubjectNamesFromAuthnUser converts the authentication user to the subject {namespace,name} pair.
+// ConvertSubjectNamesFromJwtSubject converts the JWT subject to the subject {namespace,name} pair.
 //
-// If the authentication user is not a subject-delegated authentication user(impersonate user or service account),
+// If the JWT subject is not a subject-delegated JWT subject,
 // it returns empty strings.
-func ConvertSubjectNamesFromAuthnUser(user authnuser.Info) (subjNamespace, subjName string, ok bool) {
-	un := user.GetName()
-	switch {
-	default:
-		return "", "", false
-	case strings.HasPrefix(un, "walrus:"):
-		return ConvertSubjectNamesFromImpersonateUser(un)
-	case strings.HasPrefix(un, "system:serviceaccount:"):
-	}
-	subjNamespace, subjName, ok = strings.Cut(strings.TrimPrefix(un, "system:serviceaccount:"), ":")
+func ConvertSubjectNamesFromJwtSubject(jwtSubject string) (subjNamespace, subjName string, ok bool) {
+	subjNamespace, subjName, ok = strings.Cut(strings.TrimPrefix(jwtSubject, "system:serviceaccount:"), ":")
 	if ok {
 		subjName = ConvertSubjectNameFromServiceAccountName(subjName)
 	}
@@ -76,17 +67,17 @@ func ConvertSubjectNamesFromAuthnUser(user authnuser.Info) (subjNamespace, subjN
 	return "", "", false
 }
 
-// ConvertSubjectNamesFromJwtToken converts the JWT token to the subject {namespace,name} pair.
+// ConvertSubjectNamesFromAuthnUser converts the authentication user to the subject {namespace,name} pair.
 //
-// If the JWT token is not a subject-delegated JWT token,
+// If the authentication user is not a subject-delegated authentication user(impersonate user or service account),
 // it returns empty strings.
-func ConvertSubjectNamesFromJwtToken(token jwt.Token) (subjNamespace, subjName string, ok bool) {
-	subjNamespace, subjName, ok = strings.Cut(strings.TrimPrefix(token.Subject(), "system:serviceaccount:"), ":")
-	if ok {
-		subjName = ConvertSubjectNameFromServiceAccountName(subjName)
-	}
-	if subjNamespace != "" && subjName != "" {
-		return subjNamespace, subjName, true
+func ConvertSubjectNamesFromAuthnUser(user authnuser.Info) (subjNamespace, subjName string, ok bool) {
+	un := user.GetName()
+	switch {
+	case strings.HasPrefix(un, "walrus:"):
+		return ConvertSubjectNamesFromImpersonateUser(un)
+	case strings.HasPrefix(un, "system:serviceaccount:"):
+		return ConvertSubjectNamesFromJwtSubject(un)
 	}
 	return "", "", false
 }

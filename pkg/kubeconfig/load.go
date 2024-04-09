@@ -62,8 +62,8 @@ func LoadRestConfig(path string) (*rest.Config, error) {
 	return cc.ClientConfig()
 }
 
-// WrapRestConfigWithAuthInfo authenticates the given rest config with the given http request.
-func WrapRestConfigWithAuthInfo(restCfg rest.Config, authInfo clientcmdapi.AuthInfo) *rest.Config {
+// AuthorizeRestConfigWithAuthInfo decorates the given rest config with the given authentication info.
+func AuthorizeRestConfigWithAuthInfo(restCfg rest.Config, authInfo clientcmdapi.AuthInfo) *rest.Config {
 	restCfg.TLSClientConfig = *restCfg.TLSClientConfig.DeepCopy()
 
 	switch {
@@ -94,6 +94,18 @@ func WrapRestConfigWithAuthInfo(restCfg rest.Config, authInfo clientcmdapi.AuthI
 			Groups:   authInfo.ImpersonateGroups,
 			Extra:    authInfo.ImpersonateUserExtra,
 		}
+	}
+
+	return &restCfg
+}
+
+// UnauthorizeRestConfig erases the authentication info from the  given rest config.
+func UnauthorizeRestConfig(restCfg rest.Config) *rest.Config {
+	restCfg.TLSClientConfig = *restCfg.TLSClientConfig.DeepCopy()
+
+	restCfg.Impersonate = rest.ImpersonationConfig{
+		UserName: "system:anonymous",
+		Groups:   []string{"system:unauthenticated"},
 	}
 
 	return &restCfg

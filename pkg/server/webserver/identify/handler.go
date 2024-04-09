@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -363,11 +362,7 @@ type (
 // GET/PUT: /profile
 func profile(w http.ResponseWriter, r *http.Request) {
 	// Get kube config.
-	subjNamespace, subjName, cliCfg, err := GetSubjectKubeConfig(r)
-	if err != nil {
-		ui.ResponseErrorWithCode(w, http.StatusUnauthorized, err)
-		return
-	}
+	subjNamespace, subjName, cliCfg := GetSubjectKubeConfig(r)
 
 	// Get kube client.
 	cli, err := clientset.NewForConfig(cliCfg)
@@ -431,11 +426,7 @@ type (
 // GET: /token?expirationSeconds={expirationSeconds}
 func token(w http.ResponseWriter, r *http.Request) {
 	// Get kube config.
-	subjNamespace, subjName, cliCfg, err := GetSubjectKubeConfig(r)
-	if err != nil {
-		ui.ResponseErrorWithCode(w, http.StatusUnauthorized, err)
-		return
-	}
+	subjNamespace, subjName, cliCfg := GetSubjectKubeConfig(r)
 
 	// Get kube client.
 	cli, err := clientset.NewForConfig(cliCfg)
@@ -479,11 +470,7 @@ type (
 // GET: /rules/{namespace}
 func rules(w http.ResponseWriter, r *http.Request) {
 	// Get kube config.
-	_, _, cliCfg, err := GetSubjectKubeConfig(r)
-	if err != nil {
-		ui.ResponseErrorWithCode(w, http.StatusUnauthorized, err)
-		return
-	}
+	_, _, cliCfg := GetSubjectKubeConfig(r)
 
 	// Get kube client.
 	cli, err := clientset.NewForConfig(cliCfg)
@@ -539,13 +526,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
-const (
-	_AuthenticationCookie = "walrus_session"
-
-	_AuthorizationHeader       = "Authorization"
-	_AuthorizationBearerPrefix = "Bearer "
-	_AuthorizationBasicPrefix  = "Basic "
-)
+const _AuthenticationCookie = "walrus_session"
 
 // fetchSession fetches the session token from the request.
 func fetchSession(r *http.Request) string {
@@ -553,27 +534,12 @@ func fetchSession(r *http.Request) string {
 		return ""
 	}
 
-	if c, err := r.Cookie(_AuthenticationCookie); err == nil {
-		return c.Value
+	c, err := r.Cookie(_AuthenticationCookie)
+	if err != nil {
+		return ""
 	}
 
-	if h := r.Header.Get(_AuthorizationHeader); h != "" {
-		switch {
-		case strings.HasPrefix(h, _AuthorizationBearerPrefix):
-			t := strings.TrimPrefix(h, _AuthorizationBearerPrefix)
-			return t
-		case strings.HasPrefix(h, _AuthorizationBasicPrefix):
-			c, err := stringx.DecodeBase64(strings.TrimPrefix(h, _AuthorizationBasicPrefix))
-			if err == nil {
-				_, p, ok := strings.Cut(c, ":")
-				if ok && p != "" {
-					return p
-				}
-			}
-		}
-	}
-
-	return ""
+	return c.Value
 }
 
 // assignSession assigns a session token to the response writer.
@@ -657,45 +623,48 @@ func loginSubject(w http.ResponseWriter, r *http.Request, subj *walrus.Subject, 
 }
 
 // GetSubjectKubeConfig returns subject-specified Kubernetes rest config and subject names according to the request.
-func GetSubjectKubeConfig(r *http.Request) (subjNamespace, subjName string, cliCfg *rest.Config, err error) {
+func GetSubjectKubeConfig(r *http.Request) (subjNamespace, subjName string, cliCfg *rest.Config) {
+	loopbackCliCfg := system.LoopbackKubeClientConfig.Get()
+
 	s := fetchSession(r)
 	if s == "" {
 		user, ok := genericapirequest.UserFrom(r.Context())
 		if ok {
 			subjNamespace, subjName, ok = systemauthz.ConvertSubjectNamesFromAuthnUser(user)
 			if ok {
-				cliCfg = kubeconfig.WrapRestConfigWithAuthInfo(system.LoopbackKubeClientConfig.Get(),
+				cliCfg = kubeconfig.AuthorizeRestConfigWithAuthInfo(loopbackCliCfg,
 					clientcmdapi.AuthInfo{
 						Impersonate:          user.GetName(),
 						ImpersonateUID:       user.GetUID(),
 						ImpersonateGroups:    user.GetGroups(),
 						ImpersonateUserExtra: user.GetExtra(),
 					})
-				return
+				return subjNamespace, subjName, cliCfg
 			}
 		}
-
-		if system.DisableAuths.Get() {
-			return systemkuberes.SystemNamespaceName, systemkuberes.AdminSubjectName, ptr.To(system.LoopbackKubeClientConfig.Get()), nil
-		}
-
-		return "", "", nil, errors.New("no token")
-	}
-
-	t, err := jwt.Parse(stringx.ToBytes(&s))
-	if err == nil {
-		var ok bool
-		subjNamespace, subjName, ok = systemauthz.ConvertSubjectNamesFromJwtToken(t)
-		if ok {
-			cliCfg = kubeconfig.WrapRestConfigWithAuthInfo(system.LoopbackKubeClientConfig.Get(),
-				clientcmdapi.AuthInfo{Token: s})
-			return
+	} else {
+		t, err := jwt.Parse(stringx.ToBytes(&s))
+		if err == nil {
+			var ok bool
+			subjNamespace, subjName, ok = systemauthz.ConvertSubjectNamesFromJwtSubject(t.Subject())
+			if ok {
+				cliCfg = kubeconfig.AuthorizeRestConfigWithAuthInfo(loopbackCliCfg,
+					clientcmdapi.AuthInfo{
+						Token: s,
+					})
+				return subjNamespace, subjName, cliCfg
+			}
 		}
 	}
 
+	subjNamespace, subjName = systemkuberes.SystemNamespaceName, systemkuberes.AdminSubjectName
 	if system.DisableAuths.Get() {
-		return systemkuberes.SystemNamespaceName, systemkuberes.AdminSubjectName, ptr.To(system.LoopbackKubeClientConfig.Get()), nil
+		cliCfg = kubeconfig.AuthorizeRestConfigWithAuthInfo(loopbackCliCfg,
+			clientcmdapi.AuthInfo{
+				Impersonate: systemauthz.ConvertImpersonateUserFromSubjectName(subjNamespace, subjName),
+			})
+	} else {
+		cliCfg = kubeconfig.UnauthorizeRestConfig(loopbackCliCfg)
 	}
-
-	return "", "", nil, errors.New("no token")
+	return subjNamespace, subjName, cliCfg
 }

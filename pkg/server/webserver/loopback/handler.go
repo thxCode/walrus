@@ -25,11 +25,7 @@ func Route(r *mux.Route) openapi.Decorator {
 func index() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Get kube config.
-		_, _, cliCfg, err := identify.GetSubjectKubeConfig(r)
-		if err != nil {
-			ui.ResponseErrorWithCode(w, http.StatusUnauthorized, err)
-			return
-		}
+		_, _, cliCfg := identify.GetSubjectKubeConfig(r)
 
 		// Get kube target.
 		var target *url.URL
@@ -38,6 +34,7 @@ func index() http.Handler {
 			if !strings.HasSuffix(host, "/") {
 				host += "/"
 			}
+			var err error
 			target, err = url.Parse(host)
 			if err != nil {
 				ui.ResponseErrorWithCode(w, http.StatusInternalServerError, fmt.Errorf("parse loopback kubernetes host: %w", err))

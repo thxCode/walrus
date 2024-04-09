@@ -30,6 +30,7 @@ type Options struct {
 	BootstrapPassword   string
 	DisableAuths        bool
 	DisableApplications []string
+	CorsAllowedOrigins  []string
 
 	// Authentication.
 	AuthnTokenWebhookCacheTTL time.Duration
@@ -56,6 +57,7 @@ func NewOptions() *Options {
 		BootstrapPassword:   "",
 		DisableAuths:        false,
 		DisableApplications: []string{},
+		CorsAllowedOrigins:  []string{},
 
 		// Authentication.
 		AuthnTokenWebhookCacheTTL: 10 * time.Second,
@@ -83,6 +85,13 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 		"disable authentication and authorization.")
 	fs.StringSliceVar(&o.DisableApplications, "disable-applications", o.DisableApplications,
 		"disable installing applications, select from [minio, hermitcrab].")
+	fs.StringSliceVar(&o.CorsAllowedOrigins, "cors-allowed-origins", o.CorsAllowedOrigins,
+		"the list of origins a cross-domain request can be executed from, comma separated. "+
+			"an allowed origin can be a regular expression to support subdomain matching. "+
+			"empty means all origins are allowed. "+
+			"ensure each expression matches the entire hostname by anchoring to the start with '^' or including the '//' prefix, "+
+			"and by anchoring to the end with '$' or including the ':' port separator suffix. "+
+			"examples of valid expressions are '//example.com(:|$)' and '^https://example.com(:|$)'.")
 
 	// Authentication.
 	fs.DurationVar(&o.AuthnTokenWebhookCacheTTL, "authentication-token-webhook-cache-ttl",
@@ -247,6 +256,8 @@ func (o *Options) Complete(ctx context.Context) (*Config, error) {
 
 	apiSrvCfg := genericapiserver.NewConfig(scheme.Codecs)
 	{
+		// Configure CORS allowed origins.
+		apiSrvCfg.CorsAllowedOriginList = o.CorsAllowedOrigins
 		// Feedback Kubernetes client configuration.
 		apiSrvCfg.LoopbackClientConfig = rest.CopyConfig(&mgrConfig.KubeClientConfig)
 		// Disable default metrics service.
