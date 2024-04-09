@@ -112,6 +112,19 @@ RUN set -eux; \
 ENV WALRUS_DATA_DIR="/var/run/walrus" \
     WALRUS_LID_DIR="/var/lib/walrus"
 
+# get workflow tools
+## NB: please update the following files if changed.
+## - hack/mirror/walrus-images.txt.
+## - pkg/systemkubres/helmcharts.go.
+ENV WORKFLOW_CONTROLLER_IMAGE="sealio/mirrored-workflow-controller:v3.5.0" \
+    WORKFLOW_EXECUTOR_IMAGE="sealio/mirrored-argoexec:v3.5.0" \
+    WORKFLOW_STEP_IMAGE="sealio/curl-jq:v0.0.1"
+RUN set -exo pipefail; \
+    crane pull --platform=${TARGETPLATFORM} ${WORKFLOW_CONTROLLER_IMAGE} ${K3S_DATA_DIR}/agent/images/workflow-controller.tar; \
+    crane pull --platform=${TARGETPLATFORM} ${WORKFLOW_EXECUTOR_IMAGE} ${K3S_DATA_DIR}/agent/images/workflow-executor.tar; \
+    crane pull --platform=${TARGETPLATFORM} ${WORKFLOW_STEP_IMAGE} ${K3S_DATA_DIR}/agent/images/workflow-step.tar
+ADD https://github.com/argoproj/argo-helm/releases/download/argo-workflows-0.41.1/argo-workflows-0.41.1.tgz "${WALRUS_LID_DIR}/argo-workflows.tgz"
+
 # get storage tools
 ## NB: please update the following files if changed.
 ## - hack/mirror/walrus-images.txt.

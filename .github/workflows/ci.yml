@@ -22,6 +22,7 @@ on:
       - "v*.*.*"
     branches:
       - "main"
+      - "dev"
     paths-ignore:
       - "docs/**"
       - "**.md"
@@ -31,6 +32,7 @@ on:
   pull_request:
     branches:
       - "main"
+      - "dev"
     paths-ignore:
       - "docs/**"
       - "**.md"

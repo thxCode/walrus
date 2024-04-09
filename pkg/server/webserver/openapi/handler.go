@@ -48,9 +48,9 @@ type interceptor struct {
 }
 
 func (l *interceptor) Get(ctx context.Context) ([]byte, error) {
-	// if v := l.v.Load(); v != nil {
-	// 	return v.([]byte), nil
-	// }
+	if v := l.v.Load(); v != nil {
+		return v.([]byte), nil
+	}
 
 	r, err := l.g.Do("", func() (any, error) {
 		ctx, cancel := context.WithTimeout(ctx, 30*time.Second)

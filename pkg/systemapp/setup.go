@@ -28,6 +28,7 @@ const InstalledNamespaceName = system.NamespaceName
 var installers = []_Installer{
 	installMinio,
 	installHermitCrab,
+	installArgoWorkflows,
 }
 
 type _Installer func(context.Context, *helm.Client, map[string]any, sets.Set[string]) error

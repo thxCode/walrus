@@ -229,10 +229,19 @@ var (
 		setting.InitializeFromSpecifiedEnv("NO_PROXY"),
 		setting.Allow,
 	)
+	WorkflowStepImage = newSetting(
+		"workflow-step-image",
+		"Indicates the image used by workflow step.",
+		_SettingPropEditable,
+		// When the image is updated, sync the one in server Dockerfile.
+		setting.InitializeFromEnv("sealio/curl-jq:v0.0.1"),
+		setting.AdmitWith(setting.DisallowBlank, setting.AllowContainerImageReference),
+	)
 	TerraformDeployerImage = newSetting(
 		"terraform-deployer-image",
 		"Indicates the image used by Terraform deployer.",
 		_SettingPropEditable,
+		// When the image is updated, sync the one in server Dockerfile.
 		setting.InitializeFromEnv("sealio/terraform-deployer:v1.5.7-seal.1"),
 		setting.AdmitWith(setting.DisallowBlank, setting.AllowContainerImageReference),
 	)
