@@ -17,6 +17,7 @@ replace (
 	github.com/gogo/protobuf => ./staging/github.com/gogo/protobuf
 	github.com/seal-io/code-generator => ./staging/github.com/seal-io/code-generator
 	github.com/seal-io/utils => ./staging/github.com/seal-io/utils
+	k8s.io/api => ./staging/k8s.io/api
 	k8s.io/apimachinery => ./staging/k8s.io/apimachinery
 	k8s.io/code-generator => ./staging/k8s.io/code-generator
 	k8s.io/klog/v2 => ./staging/k8s.io/klog
