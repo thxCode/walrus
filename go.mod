@@ -17,6 +17,7 @@ replace (
 replace (
 	github.com/gogo/protobuf => ./staging/github.com/gogo/protobuf
 	k8s.io/api => ./staging/k8s.io/api
+	k8s.io/apiextensions-apiserver => ./staging/k8s.io/apiextensions-apiserver
 	k8s.io/apimachinery => ./staging/k8s.io/apimachinery
 	k8s.io/kube-aggregator => ./staging/k8s.io/kube-aggregator
 )
