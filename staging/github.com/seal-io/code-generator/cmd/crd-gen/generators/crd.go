@@ -262,7 +262,7 @@ func writeSchema(sw *generator.SnippetWriter, schema *apiext.JSONSchemaProps) {
 		sw.Do("MinLength: $.PtrTo|raw$[int64]($.SCHEMA.MinLength$),\n", args)
 	}
 	if schema.Pattern != "" {
-		sw.Do("Pattern: \"$.SCHEMA.Pattern$\",\n", args)
+		sw.Do("Pattern: `$.$`,\n", schema.Pattern)
 	}
 	if schema.MaxItems != nil {
 		sw.Do("MaxItems: $.PtrTo|raw$[int64]($.SCHEMA.MaxItems$),\n", args)

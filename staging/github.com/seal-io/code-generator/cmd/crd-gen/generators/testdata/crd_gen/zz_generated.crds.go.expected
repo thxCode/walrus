@@ -103,6 +103,7 @@ func crd_crd_gen_generators_testdata_crd_gen_Dummy() *v1.CustomResourceDefinitio
 										"sliceSubDummySpec",
 										"dummyX",
 										"dummyY",
+										"quantity",
 									},
 									Properties: map[string]v1.JSONSchemaProps{
 										"arrayObject": {
@@ -412,6 +413,18 @@ func crd_crd_gen_generators_testdata_crd_gen_Dummy() *v1.CustomResourceDefinitio
 											Format:   "date-time",
 											Nullable: true,
 										},
+										"quantity": {
+											Pattern: `^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$`,
+											AnyOf: []v1.JSONSchemaProps{
+												{
+													Type: "integer",
+												},
+												{
+													Type: "string",
+												},
+											},
+											XIntOrString: true,
+										},
 										"rawExtension": {
 											Type:                   "object",
 											XPreserveUnknownFields: ptr.To[bool](true),
@@ -603,7 +616,7 @@ func crd_crd_gen_generators_testdata_crd_gen_Dummy() *v1.CustomResourceDefinitio
 															Type:        "string",
 															MaxLength:   ptr.To[int64](1024),
 															MinLength:   ptr.To[int64](1),
-															Pattern:     "^[AZaZ]([AZaZ09,]*[AZaZ09])?$",
+															Pattern:     `^[AZaZ]([AZaZ09,]*[AZaZ09])?$`,
 														},
 														"status": {
 															Description: "status of the condition, one of True, False, Unknown.",
@@ -624,7 +637,7 @@ func crd_crd_gen_generators_testdata_crd_gen_Dummy() *v1.CustomResourceDefinitio
 															Description: "type of condition in CamelCase or in foo.example.com/CamelCase.\n---\nMany .condition.type values are consistent across resources like Available, but because arbitrary conditions can be\nuseful (see .node.status.conditions), the ability to deconflict is important.\nThe regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)",
 															Type:        "string",
 															MaxLength:   ptr.To[int64](316),
-															Pattern:     "^([aZ09]([AZ09]*[aZ09])?(\\.[aZ09]([AZ09]*[aZ09])?)*/)?(([AZaZ09][AZaZ09.]*)?[AZaZ09])$",
+															Pattern:     `^([aZ09]([AZ09]*[aZ09])?(\.[aZ09]([AZ09]*[aZ09])?)*/)?(([AZaZ09][AZaZ09.]*)?[AZaZ09])$`,
 														},
 													},
 												},

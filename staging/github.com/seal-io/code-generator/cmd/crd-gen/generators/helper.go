@@ -702,8 +702,7 @@ func schemeType(logger klog.Logger, visited map[*types.Type]struct{}, t *types.T
 							} else if _, err = regexp.Compile(v); err != nil {
 								logger.Error(err, "invalid pattern", "value", mv)
 							} else {
-								v = strconv.Quote(v)
-								subProps.Pattern = v[1 : len(v)-1]
+								subProps.Pattern = v
 							}
 						case "preserveUnknownFields":
 							if !isStruct(mem.Type) {

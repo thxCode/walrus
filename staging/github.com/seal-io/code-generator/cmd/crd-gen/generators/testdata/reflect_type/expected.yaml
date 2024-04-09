@@ -223,6 +223,12 @@ spec:
                 format: date-time
                 nullable: true
                 type: string
+              quantity:
+                anyOf:
+                - type: integer
+                - type: string
+                pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                x-kubernetes-int-or-string: true
               rawExtension:
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
@@ -353,6 +359,7 @@ spec:
             - sliceSubDummySpec
             - dummyX
             - dummyY
+            - quantity
             type: object
           status:
             properties:
@@ -405,7 +412,7 @@ spec:
                         useful (see .node.status.conditions), the ability to deconflict is important.
                         The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)
                       maxLength: 316
-                      pattern: ^([aZ09]([AZ09]*[aZ09])?(\\.[aZ09]([AZ09]*[aZ09])?)*/)?(([AZaZ09][AZaZ09.]*)?[AZaZ09])$
+                      pattern: ^([aZ09]([AZ09]*[aZ09])?(\.[aZ09]([AZ09]*[aZ09])?)*/)?(([AZaZ09][AZaZ09.]*)?[AZaZ09])$
                       type: string
                   required:
                   - type
